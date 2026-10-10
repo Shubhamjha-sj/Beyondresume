@@ -515,7 +515,7 @@ async function handle(req, res) {
   // The product shell is served at the root (its relative URLs resolve via <base>); standalone FabTwin stays at /index.html.
   if (url.pathname === '/') {
     if (req.method !== 'GET' && req.method !== 'HEAD') return sendText(res, 405, 'Method not allowed', { Allow: 'GET, HEAD' });
-    const html = (await readFile(join(realRoot, 'prototype', 'index.html'), 'utf8')).replace(/<head([^>]*)>/i, '<head$1>\n<base href="/prototype/">');
+    const html = (await readFile(join(realRoot, 'prototype', 'index.html'), 'utf8')).replace(/<head(\s[^>]*)?>/i, '<head$1>\n<base href="/prototype/">');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
     return res.end(req.method === 'HEAD' ? undefined : html);
   }

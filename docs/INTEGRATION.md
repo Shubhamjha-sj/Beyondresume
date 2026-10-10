@@ -58,7 +58,7 @@ All messages are plain objects. The child sends `{ source: "fabtwin", type, ... 
 | --- | --- |
 | `start` | `{ candidate }`. Unlocks audio and starts the scenario; the candidate then clicks into the 3D view to walk (pointer lock needs a click inside the iframe). |
 | `end` | `{ reason }`. Ends the scenario now (`runner.end(reason)`), which leads to `ended`. |
-| `subtitle` | `{ speaker, text }`. Shows Sam's current line in FabTwin's subtitle bar. |
+| `subtitle` | `{ speaker, text }`. Accepted but ignored: the call screen already captions Sam right below the 3D view, so FabTwin doesn't repeat it. |
 
 ## Sam (ElevenLabs agent)
 
