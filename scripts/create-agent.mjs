@@ -124,6 +124,7 @@ function agentBodyOf(config, prompt, toolIds) {
           prompt,
           llm: agent.llm,
           reasoning_effort: agent.reasoning_effort,
+          service_tier: agent.service_tier,
           temperature: agent.temperature,
           tool_ids: toolIds,
           built_in_tools: builtIns,
@@ -207,6 +208,7 @@ async function verify(api, agentId, config, prompt, toolIds) {
   const checks = [
     ['llm', p.llm === config.agent.llm, p.llm],
     ['reasoning effort', p.reasoning_effort === config.agent.reasoning_effort, p.reasoning_effort],
+    ['service tier', p.service_tier === config.agent.service_tier, p.service_tier],
     ['temperature', p.temperature === config.agent.temperature, p.temperature],
     ['prompt', p.prompt === prompt, `${p.prompt.length} chars`],
     ['first message', cc.agent.first_message === config.agent.first_message, JSON.stringify(cc.agent.first_message)],

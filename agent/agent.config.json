@@ -8,6 +8,7 @@
     "max_conversation_duration_message": "We're out of time. Thanks, that's all for today.",
     "llm": "gpt-6-luna",
     "reasoning_effort": "none",
+    "service_tier": "fast",
     "temperature": 0.3
   },
 
