@@ -6,7 +6,7 @@ IndustryProof tests how candidates handle a live crisis on a 3D replica of your 
 
 **Live demo:** https://industryproof.up.railway.app
 
-![IndustryProof: your own site in 3D, a live crisis, a verified result](docs/images/industryproof-overview.jpg)
+![IndustryProof company view: set up a site-accurate assessment and review results](docs/images/company-overview.jpg)
 
 ## How it works
 
@@ -22,6 +22,8 @@ IndustryProof tests how candidates handle a live crisis on a 3D replica of your 
 - **Assessment:** 8 pass/fail checks plus 11 competencies, each linked to evidence from the call and the 3D log
 - **Signed credential:** ECDSA P-256, a public verification page, and a shareable badge
 - **Company, candidate and public screens** in one flow
+
+![Results review: every rubric check with its timestamp, the candidate's words and what they did in 3D](docs/images/results-review.jpg)
 
 **Built with:** World Labs Marble · ElevenLabs Agents · three.js + Spark · Node · WebCrypto
 
