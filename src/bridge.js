@@ -21,7 +21,7 @@ export class Bridge {
     });
   }
 
-  // Handle one inbound message type: 'start', 'end' or 'subtitle'.
+  // Handle one inbound message type: 'start' or 'end' ('subtitle' is accepted but unused).
   on(type, fn) {
     this.handlers.set(type, fn);
     return this;

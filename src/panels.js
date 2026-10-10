@@ -21,7 +21,9 @@ export class ToolPanel {
       if (!btn || !this.tool || btn.disabled) return;
       if (btn.dataset.act === 'close') return this.onClose();
       this.message = this.onAction({ action: btn.dataset.act, tool: this.tool.id, source: 'tool_panel' });
+      const scroll = this.el.querySelector('.hmi')?.scrollTop ?? 0;
       this.render();
+      this.el.querySelector('.hmi').scrollTop = scroll; // stay at the buttons (the message lands just above them)
     });
   }
 
@@ -93,13 +95,13 @@ export class ToolPanel {
         ${alarmBox}${note}
         <table class="hmi-readings"><tbody>${this.readingRows()}</tbody></table>
         <div class="hmi-lot">${this.lotLine()}</div>
+        ${msg}
         <div class="hmi-actions">
           <button data-act="ack_alarm" ${a && !a.acked ? '' : 'disabled'}>Acknowledge alarm</button>
           <button data-act="hold_tool" ${canHold(t.state) ? '' : 'disabled'}>Put tool on hold</button>
           <button data-act="reset_resume" ${a ? '' : 'disabled'}>Reset alarm &amp; resume</button>
         </div>
         <button class="emo" data-act="emo" ${t.state === 'emo' ? 'disabled' : ''}>EMO · Emergency off</button>
-        ${msg}
         <footer><span>Live readings</span><button class="ghost" data-act="close">Close <kbd>E</kbd></button></footer>
       </div>`;
   }

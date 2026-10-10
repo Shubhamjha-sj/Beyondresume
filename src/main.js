@@ -397,13 +397,8 @@ bridge
     const reason = msg.reason || 'ended_by_call';
     if (app.mode === 'loading') embed.endReason = reason; // boot() ends it right after loading
     else if (runner && !runner.ended) runner.end(reason); // -> scenario_end -> finish() -> 'ended'
-  })
-  .on('subtitle', (msg) => {
-    if (!hud) return;
-    const text = String(msg.text ?? '').trim();
-    if (text) hud.showSubtitleFor(msg.speaker || 'Sam', text);
-    else hud.hideSubtitleSoon(0);
   });
+// 'subtitle' messages (Sam's lines on the call) are ignored: the call screen captions them right below us.
 
 // ---------- Scenario events -> world ----------
 function handleEvent(evt) {

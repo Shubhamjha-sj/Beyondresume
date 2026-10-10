@@ -104,19 +104,20 @@ kbd {
 
 /* ---------- HUD ---------- */
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
-#labels { position: absolute; inset: 0; overflow: hidden; }
+#labels { position: absolute; inset: 0; overflow: hidden; z-index: 0; } /* own stacking context: label z-index stays under the rest of the HUD */
 
 .tool-label {
   position: absolute; left: 0; top: 0;
   display: flex; align-items: center; gap: 6px;
   padding: 3px 8px 3px 6px; border-radius: 6px;
-  background: rgba(10, 12, 16, 0.72); border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 12, 16, 0.9); border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 12px; white-space: nowrap;
   opacity: 0; will-change: transform, opacity;
 }
 .tool-label i { width: 8px; height: 8px; border-radius: 50%; background: var(--state, var(--ok)); box-shadow: 0 0 6px var(--state, var(--ok)); }
 .tool-label b { font-weight: 650; letter-spacing: 0.3px; }
 .tool-label small { color: var(--muted); }
+.tool-label.is-far small { display: none; }
 .tool-label.is-alarm { border-color: rgba(255, 77, 77, 0.75); }
 .tool-label.is-alarm i { animation: blink 0.8s steps(2) infinite; }
 
@@ -198,7 +199,7 @@ kbd {
 /* Tool control screen */
 .hmi {
   width: min(500px, 100%); max-height: calc(100vh - 32px); overflow: auto;
-  padding: 18px; border-radius: 12px;
+  padding: 18px 18px 0; border-radius: 12px; /* no bottom padding: the sticky footer brings its own */
   background: #0e1622; border: 1px solid #233246;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55); font-size: 14px;
 }
@@ -234,9 +235,14 @@ button.emo {
   color: #fff; font-weight: 800; letter-spacing: 0.6px;
 }
 button.emo:hover:not(:disabled) { background: #d32f2f; }
-.hmi-msg { margin: 10px 0 0; padding: 8px 10px; border-radius: 8px; background: rgba(62, 207, 107, 0.12); color: #bff0cf; font-size: 13px; }
+.hmi-msg { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: rgba(62, 207, 107, 0.12); color: #bff0cf; font-size: 13px; }
 .hmi-msg.err { background: rgba(255, 90, 79, 0.12); color: #ffc4be; }
-.hmi footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; color: var(--muted); font-size: 12px; }
+.hmi footer {
+  position: sticky; bottom: 0; /* Close stays in view when the screen scrolls */
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 4px; padding: 10px 0 18px;
+  background: #0e1622; color: var(--muted); font-size: 12px;
+}
 
 /* Operator terminal */
 .dash {
@@ -344,9 +350,9 @@ button.emo:hover:not(:disabled) { background: #d32f2f; }
 .is-embed .keys { margin-top: 14px; gap: 4px; font-size: 12px; }
 .is-embed .keys li > span { min-width: 104px; }
 
-/* HUD: smaller and closer to the edges so the view stays clear */
-.is-embed #clock { top: 8px; font-size: 12px; }
-.is-embed #toast { top: 40px; }
+/* HUD: smaller and closer to the edges so the view stays clear; the call screen shows its own clock */
+.is-embed #clock { display: none; }
+.is-embed #toast { top: 10px; }
 .is-embed #hint { left: 10px; bottom: 10px; padding: 5px 10px; font-size: 12px; }
 .is-embed #minimap { right: 10px; bottom: 10px; height: min(190px, 36vh); }
 .is-embed #subtitles {
@@ -358,8 +364,10 @@ button.emo:hover:not(:disabled) { background: #d32f2f; }
 /* Tool screen and terminal: use the whole frame; keep the terminal in two columns when it fits */
 .is-embed .modal { padding: 8px; }
 .is-embed .hmi, .is-embed .dash { max-height: calc(100vh - 16px); }
-.is-embed .hmi { padding: 14px; }
+.is-embed .hmi { padding: 14px 14px 0; }
+.is-embed .hmi footer { padding-bottom: 14px; }
 .is-embed .dash > header, .is-embed .dash > footer { padding: 8px 12px; }
+.is-embed .dash [data-act="end_shift"] { display: none; } /* the call screen ends the shift ("End call & submit") */
 .is-embed .dash-body { gap: 12px; padding: 10px 12px; }
 .is-embed .dash section { margin-bottom: 12px; }
 .is-embed .dash-map { height: 200px; }

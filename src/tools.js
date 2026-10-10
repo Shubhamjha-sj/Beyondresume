@@ -363,6 +363,8 @@ export class ToolManager {
       const y = (-v.y * 0.5 + 0.5) * height;
       el.style.opacity = String(fade);
       el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
+      el.style.zIndex = String(1000 - Math.round(dist * 10)); // nearer labels draw on top
+      el.classList.toggle('is-far', dist > 6); // far away: just the id, no process line
     }
   }
 }
