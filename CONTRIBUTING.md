@@ -41,7 +41,7 @@ This is Sam's public agent id. It isn't a secret: the live site serves it from `
 
 - Without `ELEVENLABS_AGENT_ID`, the call plays a scripted sample instead of the live Sam.
 - The credential signing key (`ISSUER_PRIVATE_JWK`) is generated automatically on first start. Local credentials are signed with your own key, so they won't verify on the live site, and that's expected.
-- `ELEVENLABS_API_KEY` is needed only to change Sam's settings (`npm run agent`). Ask Sang before changing Sam: the live demo uses the same agent.
+- You don't need `ELEVENLABS_API_KEY`. To change Sam, edit `agent/prompt.md` or `agent/agent.config.json` in a PR. After it merges, the key holder runs `npm run agent` to apply it to the live agent. Don't create your own copy of Sam for the demo.
 
 Use Chrome with headphones. Sam's voice and the alarm horn leak into a laptop microphone.
 
@@ -70,5 +70,6 @@ How the parts talk to each other (postMessage types, director cues, tool names, 
 
 ## Secrets and accounts
 
-- Railway (`industryproof-demo`) and ElevenLabs are on Sang's accounts. Ask Sang for access or for deploy changes.
+- Railway (`industryproof-demo`) and the ElevenLabs account are owned by the team lead. You don't need access to either: merging to `main` deploys, and Sam changes go through a PR as described above.
+- Until Railway is connected to GitHub, deploys after a merge are run by hand with `railway up`. If the live site doesn't update within a few minutes of your merge, post in #future-of-work-hackathon.
 - Railway holds `BIND_HOST`, `ELEVENLABS_AGENT_ID`, `ISSUER_KEY_ID` and `ISSUER_PRIVATE_JWK`. The ElevenLabs API key is not on Railway; the server doesn't need it.
