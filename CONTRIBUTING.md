@@ -72,5 +72,5 @@ How the parts talk to each other (postMessage types, director cues, tool names, 
 ## Secrets and accounts
 
 - Railway (`industryproof-demo`) and the ElevenLabs account are owned by the team lead. You don't need access to either: merging to `main` deploys, and Sam changes go through a PR as described above.
-- Until Railway is connected to GitHub, deploys after a merge are run by hand with `railway up`. If the live site doesn't update within a few minutes of your merge, post in #future-of-work-hackathon.
+- Railway is connected to GitHub `main`, so a merge is live in about a minute. If the live site doesn't update within a few minutes of your merge, post in #future-of-work-hackathon.
 - Railway holds `BIND_HOST`, `ELEVENLABS_AGENT_ID`, `ISSUER_KEY_ID` and `ISSUER_PRIVATE_JWK`. The ElevenLabs API key is not on Railway; the server doesn't need it.
