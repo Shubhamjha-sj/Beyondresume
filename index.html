@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FabTwin – Cleanroom Assessment</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+      "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/2.3.1/spark.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <!-- In-world HUD (visible while walking) -->
+  <div id="hud" class="is-hidden">
+    <div id="labels"></div>
+    <div id="crosshair"></div>
+    <div id="prompt" class="is-hidden"></div>
+    <div id="clock"></div>
+    <div id="hint">
+      <kbd>Tab</kbd> Terminal <span id="alarm-badge" class="is-hidden"></span>
+      <span class="sep">·</span><kbd>E</kbd> Use tool
+      <span class="sep">·</span><kbd>Esc</kbd> Pause
+    </div>
+    <div id="subtitles" class="is-hidden"></div>
+    <div id="minimap">
+      <img id="minimap-img" src="./assets/floorplan.png" alt="Fab floor plan" />
+      <div id="minimap-player"></div>
+    </div>
+    <div id="debug" class="is-hidden"></div>
+    <div id="toast" class="is-hidden"></div>
+  </div>
+
+  <!-- Modal screens -->
+  <div id="tool-panel" class="modal is-hidden"></div>
+  <div id="dashboard" class="modal is-hidden"></div>
+  <div id="results" class="is-hidden"></div>
+
+  <!-- Start / loading / pause screen -->
+  <div id="overlay">
+    <div class="panel">
+      <h1>FabTwin</h1>
+      <p class="sub">Cleanroom readiness assessment</p>
+
+      <div id="setup">
+        <p id="briefing" class="briefing"></p>
+        <label class="field">
+          <span>Your name</span>
+          <input id="candidate" type="text" maxlength="60" placeholder="e.g. Alex Chen" autocomplete="off" />
+        </label>
+      </div>
+
+      <div id="loading">
+        <div class="bar"><div id="bar-fill"></div></div>
+        <p id="loading-text">Loading the fab…</p>
+      </div>
+
+      <p id="error" class="is-hidden"></p>
+
+      <button id="enter" disabled>Begin shift</button>
+
+      <ul class="keys">
+        <li><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span> walk (hold <kbd>Shift</kbd> to go faster)</li>
+        <li><span>Mouse</span> look around</li>
+        <li><span><kbd>E</kbd></span> use the tool you're looking at</li>
+        <li><span><kbd>Tab</kbd></span> operator terminal</li>
+        <li><span><kbd>Esc</kbd></span> pause</li>
+      </ul>
+      <p class="fine">Turn your sound on: your supervisor will talk to you during the shift.</p>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

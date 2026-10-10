@@ -1,0 +1,108 @@
+# FabTwin – cleanroom readiness assessment
+
+A walkable digital twin of a semiconductor fab bay (generated with World Labs Marble) where
+candidates handle a live equipment fault. Everything they do is logged and scored.
+
+## Run it
+
+```bash
+cd ~/Desktop/Hackathon
+npm start                  # = npx serve -l 5173   (or: python3 -m http.server 5173)
+```
+
+Open http://localhost:5173 in **Chrome** with sound on. Enter a name and click **Begin shift**.
+
+For a real candidate, hide the developer tools: http://localhost:5173/?dev=0&debug=0
+
+Run the scenario and scoring tests (no browser needed): `npm test`
+
+## Controls
+
+| Key | Action |
+| --- | --- |
+| W A S D / arrows | walk (hold Shift to go faster) |
+| Mouse | look around |
+| E | open the control panel of the tool under the crosshair (E again to close) |
+| Tab | operator terminal (Tab again to close) |
+| Esc | pause |
+
+Dev keys (only when `dev` is on): **N** noclip (R/F fly), **H** outline every tool,
+**P** copy your position, **J** skip 15 s of scenario time, **`** toggle the read-out.
+
+## The scenario: Etch 2 chamber pressure fault
+
+`scenarios/etch2-pressure-fault.json`
+
+| Time | What happens |
+| --- | --- |
+| 0:02 | Supervisor (voice) briefs the candidate |
+| 0:30 | ETCH-02 alarms: horn sound at the tool, red stack light, alarm on the terminal. LOT-4471 is scheduled to arrive at ETCH-02 in 90 s |
+| 0:34 | Supervisor asks the candidate to check it |
+| 1:48 | Overhead vehicle starts bringing LOT-4471 in (no rerouting after this) |
+| 2:00 | LOT-4471 lands at whatever tool it is routed to |
+
+What a good operator does (and what is scored):
+
+| Expected | Within | Weight |
+| --- | --- | --- |
+| Check the ETCH-02 control screen | 60 s | 15 |
+| Acknowledge the alarm at the tool | 90 s | 10 |
+| Put ETCH-02 on hold | 120 s | 20 |
+| Reroute LOT-4471 to ETCH-01 (ETCH-03 is down for PM) | 78 s | 25 |
+| Call maintenance for ETCH-02 | 180 s | 20 |
+| Message the supervisor | 240 s | 10 |
+
+Penalties: EMO when nobody is in danger (−30), "Reset alarm & resume" (−30, and the alarm comes
+back with a scrapped wafer), rerouting to the PM tool (−15), letting the lot land on ETCH-02 (−20),
+holding a healthy tool (−5 each), acting before checking the screen (−3/−5).
+
+Late actions get half credit. The results page shows the overall score, five skill scores
+(response time, procedure, judgment, safety, communication), metrics, a checklist and the full
+timeline, and can download the complete log as JSON (every action, event, zone entry and the
+walked path).
+
+## Project layout
+
+```
+index.html                 page shell + import map (three.js 0.180 and Spark 2.3.1 from CDN)
+src/main.js                wiring: loading, modes (walking / panel / paused / results), main loop
+src/config.js              spawn, speeds, URLs, dev flags
+src/player.js              first-person controls with collisions
+src/navgrid.js             walkable-floor lookups
+src/minimap.js             HUD minimap
+src/tools.js               tools: hit boxes, stack lights, name tags, zones, tool states
+src/oht.js                 overhead vehicles and FOUP deliveries
+src/audio.js               synthesised sounds (hum, alarm horn, vehicle whir, UI) + speech
+src/scenario.js            scenario runner: timeline, lots, reactions, end conditions
+src/log.js                 session log
+src/scoring.js             scoring against the scenario's expectations
+src/hud.js, panels.js, results.js   HUD, tool screen + operator terminal, results page
+scenarios/*.json           scenario definitions (timeline, reactions, expectations, penalties)
+assets/layout.json         tool positions in the world, overhead-rail positions
+assets/fab.spz             the Marble world
+assets/navgrid.json, floorplan.png   generated from the world by tools/build_navgrid.py
+tests/scenario.test.mjs    simulated runs that check scoring
+```
+
+## Editing
+
+- **Tool positions**: `assets/layout.json`. `module` is the low load-port unit in front of each
+  tool as `[x0, x1, z0, z1]` in metres. Press **H** in the app to see every outline, **P** to read
+  your position.
+- **Scenarios**: copy `scenarios/etch2-pressure-fault.json`, change it, and open
+  `http://localhost:5173/?scenario=<file-name-without-.json>`. Event types: `say`, `alarm`, `lot`;
+  reactions are keyed by `action:tool` (e.g. `emo:ETCH-02`) or just the action.
+- **New Marble world**: replace `assets/fab.spz`, then
+  `pip install numpy pillow && python3 tools/build_navgrid.py assets/fab.spz assets` and check
+  `assets/navgrid_debug.png` (green = walkable).
+
+## Roadmap
+
+1. Walkable fab ✅
+2. Interactive tools and zones ✅
+3. Scenario engine + Etch 2 fault scenario with sound ✅
+4. Operator terminal ✅
+5. Action log and scoring ✅
+6. Voice assessment (candidate speaks to the supervisor; speech rate, hesitation, tone)
+7. Verifiable credential for the result
+8. Polish, deploy, demo script

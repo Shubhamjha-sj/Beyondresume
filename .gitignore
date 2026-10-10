@@ -1,0 +1,15 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python / Node
+__pycache__/
+*.pyc
+node_modules/
+
+# Original Marble export (a copy lives in assets/fab.spz)
+Modern Semiconductor Fab Cleanroom.spz
+
+# Downloaded assessment logs
+fabtwin-*.json

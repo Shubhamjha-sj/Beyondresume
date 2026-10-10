@@ -1,0 +1,11 @@
+{
+  "name": "fabtwin",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Walkable semiconductor-fab digital twin for assessing candidates",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve -l 5173",
+    "test": "node tests/scenario.test.mjs"
+  }
+}

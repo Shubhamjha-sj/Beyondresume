@@ -1,0 +1,66 @@
+{
+  "id": "etch2-pressure-fault",
+  "title": "Etch 2 chamber pressure fault",
+  "role": "Bay 3 equipment operator",
+  "briefing": "You're covering Bay 3 (litho, etch and deposition). Walk the bay, keep the tools running and respond to anything unusual. Your operator terminal (Tab) shows tool status and incoming wafer lots.",
+  "focusTool": "ETCH-02",
+  "timeLimit": 330,
+
+  "timeline": [
+    { "at": 2, "type": "say", "speaker": "Supervisor", "text": "Morning! You're covering Bay 3 today. Take a walk down the aisle and get familiar with the tools. Your terminal is on Tab." },
+    { "at": 30, "id": "alarm", "type": "alarm", "tool": "ETCH-02", "code": "E-4102", "message": "Chamber B pressure high", "reading": "chamberB", "value": 182, "limit": 120, "unit": "mTorr" },
+    { "at": 30, "type": "lot", "lot": "LOT-4471", "wafers": 25, "product": "DRAM word-line etch", "to": "ETCH-02", "eta": 90 },
+    { "at": 30, "type": "lot", "lot": "LOT-4476", "wafers": 25, "product": "Liner deposition", "to": "CVD-01", "eta": 170 },
+    { "at": 34, "type": "say", "speaker": "Supervisor", "text": "Heads up, I'm seeing an alarm on Etch 2 from here. Can you check it out?" }
+  ],
+
+  "reactions": {
+    "reset_resume:ETCH-02": [
+      { "delay": 9, "type": "alarm", "tool": "ETCH-02", "code": "E-4102", "message": "Chamber B pressure high, wafer in process scrapped", "reading": "chamberB", "value": 236, "limit": 120, "unit": "mTorr" },
+      { "delay": 12, "type": "say", "speaker": "Supervisor", "text": "Etch 2 alarmed again? Did someone reset it? We just lost a wafer." }
+    ],
+    "emo": [
+      { "delay": 2, "type": "say", "speaker": "Supervisor", "text": "Was that an EMO? That kills power to the whole tool and scraps what's in the chambers. EMO is for emergencies only." }
+    ],
+    "call_maintenance:ETCH-02": [
+      { "delay": 4, "type": "say", "speaker": "Maintenance", "text": "Maintenance here. Got your ticket for Etch 2, we're on our way." }
+    ],
+    "notify_supervisor": [
+      { "delay": 3, "type": "say", "speaker": "Supervisor", "text": "Got it, thanks for the update." }
+    ],
+    "lot_arrived:ETCH-02": [
+      { "delay": 1, "type": "say", "speaker": "Supervisor", "text": "LOT-4471 just landed on Etch 2 while it's alarmed. Those wafers are stuck there now." }
+    ],
+    "lot_arrived:ETCH-03": [
+      { "delay": 1, "type": "say", "speaker": "Supervisor", "text": "Why is LOT-4471 sitting at Etch 3? That tool is down for maintenance." }
+    ]
+  },
+
+  "expect": [
+    { "id": "inspect", "label": "Checked the Etch 2 control screen", "match": { "action": "inspect", "tool": "ETCH-02" }, "after": "alarm", "within": 60, "weight": 15, "skill": "response" },
+    { "id": "ack", "label": "Acknowledged the alarm at the tool", "match": { "action": "ack_alarm", "tool": "ETCH-02" }, "after": "alarm", "within": 90, "weight": 10, "skill": "procedure" },
+    { "id": "hold", "label": "Put Etch 2 on hold", "match": { "action": "hold_tool", "tool": "ETCH-02" }, "after": "alarm", "within": 120, "weight": 20, "skill": "procedure" },
+    { "id": "reroute", "label": "Rerouted LOT-4471 to the working etcher (ETCH-01)", "match": { "action": "reroute", "lot": "LOT-4471", "to": "ETCH-01" }, "after": "alarm", "within": 78, "weight": 25, "skill": "judgment" },
+    { "id": "maint", "label": "Called maintenance for Etch 2", "match": { "action": "call_maintenance", "tool": "ETCH-02" }, "after": "alarm", "within": 180, "weight": 20, "skill": "procedure" },
+    { "id": "notify", "label": "Updated the supervisor", "match": { "action": "notify_supervisor" }, "after": "alarm", "within": 240, "weight": 10, "skill": "communication" }
+  ],
+
+  "order": [
+    { "first": "inspect", "then": "hold", "penalty": 5, "skill": "procedure", "label": "Put the tool on hold before checking what was wrong" },
+    { "first": "inspect", "then": "maint", "penalty": 3, "skill": "procedure", "label": "Called maintenance before reading the alarm details" }
+  ],
+
+  "forbid": [
+    { "id": "emo", "label": "Pressed the emergency stop (EMO) when nobody was in danger", "match": { "action": "emo" }, "penalty": 30, "skill": "safety" },
+    { "id": "bypass", "label": "Reset the alarm and resumed processing without maintenance", "match": { "action": "reset_resume" }, "penalty": 30, "skill": "safety" },
+    { "id": "pm-reroute", "label": "Sent the lot to a tool that is down for maintenance (ETCH-03)", "match": { "action": "reroute", "to": "ETCH-03" }, "penalty": 15, "skill": "judgment" },
+    { "id": "delivered", "label": "Let LOT-4471 be delivered to the faulted tool", "match": { "event": "lot_arrived", "lot": "LOT-4471", "tool": "ETCH-02" }, "penalty": 20, "skill": "judgment" },
+    { "id": "hold-healthy", "label": "Put a healthy tool on hold", "match": { "action": "hold_tool", "toolNot": "ETCH-02" }, "penalty": 5, "skill": "judgment", "repeat": true }
+  ],
+
+  "end": {
+    "waitForLot": "LOT-4471",
+    "delay": 9,
+    "say": { "speaker": "Supervisor", "text": "Nice work. Etch 2 is safe and maintenance has it from here. That's the end of this exercise." }
+  }
+}

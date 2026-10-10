@@ -1,0 +1,19 @@
+{
+  "note": "World coordinates in metres: x right, y up, -z points down the aisle from the spawn point. 'module' is the low load-port unit in front of each tool as [x0, x1, z0, z1]; 'top' is its height. Positions were measured from the splat world (tools/render_view.py helps check them).",
+  "rails": {
+    "left": { "x": -2.67, "y": 3.45 },
+    "right": { "x": 2.59, "y": 3.45 },
+    "zMin": -12.0,
+    "zMax": 1.5
+  },
+  "tools": [
+    { "id": "PVD-01",   "type": "PVD",   "process": "Physical vapour deposition",  "side": "left",  "module": [-3.3, -1.3, -2.4, -0.1],  "top": 0.65, "state": "running", "lot": "LOT-1102" },
+    { "id": "LITHO-01", "type": "Litho", "process": "Photolithography scanner",    "side": "left",  "module": [-2.9, -1.2, -5.1, -4.2],  "top": 0.62, "state": "running", "lot": "LOT-2290" },
+    { "id": "LITHO-02", "type": "Litho", "process": "Photolithography scanner",    "side": "left",  "module": [-3.0, -1.3, -7.4, -6.4],  "top": 0.56, "state": "idle" },
+    { "id": "LITHO-03", "type": "Litho", "process": "Photolithography scanner",    "side": "left",  "module": [-2.9, -1.0, -9.7, -8.9],  "top": 0.70, "state": "running", "lot": "LOT-3015" },
+    { "id": "CVD-01",   "type": "CVD",   "process": "Chemical vapour deposition",  "side": "right", "module": [1.2, 3.0, -0.8, 0.0],     "top": 0.66, "state": "running", "lot": "LOT-1187" },
+    { "id": "ETCH-01",  "type": "Etch",  "process": "Plasma etch",                 "side": "right", "module": [1.2, 3.0, -5.0, -4.3],    "top": 0.75, "state": "running", "lot": "LOT-3388" },
+    { "id": "ETCH-02",  "type": "Etch",  "process": "Plasma etch",                 "side": "right", "module": [1.5, 3.4, -9.2, -7.5],    "top": 0.75, "state": "running", "lot": "LOT-3402" },
+    { "id": "ETCH-03",  "type": "Etch",  "process": "Plasma etch",                 "side": "right", "module": [2.4, 3.8, -12.2, -11.2],  "top": 0.75, "state": "pm", "note": "Scheduled maintenance until 14:00" }
+  ]
+}
