@@ -1,6 +1,8 @@
 # Contributing
 
-Live demo: https://industryproof.up.railway.app (redirects to `/prototype/`). Standalone FabTwin is at `/index.html`.
+Live demo: https://industryproof.up.railway.app. Standalone FabTwin is at `/index.html`.
+
+If you use a coding AI (Claude Code, Codex, Cursor), point it at this file and `docs/INTEGRATION.md` first. Together they cover setup, branch rules and how the parts fit together.
 
 ## Branches and deploys
 
@@ -32,8 +34,10 @@ npm start            # http://localhost:5173 -> /prototype/
 Create `.env.local` in the repo root. It is gitignored: never commit it and never paste the API key in Slack.
 
 ```
-ELEVENLABS_AGENT_ID=<ask Sang; it is the public agent id>
+ELEVENLABS_AGENT_ID=agent_0401m4jgd5j3enz9rhvbrrjw0t6m
 ```
+
+This is Sam's public agent id. It isn't a secret: the live site serves it from `/api/config`.
 
 - Without `ELEVENLABS_AGENT_ID`, the call plays a scripted sample instead of the live Sam.
 - The credential signing key (`ISSUER_PRIVATE_JWK`) is generated automatically on first start. Local credentials are signed with your own key, so they won't verify on the live site, and that's expected.
