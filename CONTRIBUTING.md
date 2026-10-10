@@ -52,7 +52,8 @@ Use Chrome with headphones. Sam's voice and the alarm horn leak into a laptop mi
 | Product screens (company, candidate, public) | `prototype/index.html` | One file, vanilla JS |
 | Live call (Sam, cues, client tools) | `prototype/lib/live-call.js` | Director cues and timing constants are at the top |
 | Voice signals | `prototype/lib/voice-metrics.js`, `signal-panel.js` | Tests in `tests/voice-metrics.test.mjs` |
-| Scoring, rubric, sample candidates | `prototype/lib/assessment.js`, `samples.js` | Tests in `tests/assessment.test.mjs` |
+| Scoring, rubric, competencies, sample candidates | `prototype/lib/assessment.js`, `samples.js` | Tests in `tests/assessment.test.mjs` |
+| Skills badge, share links, link previews | `prototype/lib/badge.js`, `prototype/badge-og.png` | Tests in `tests/badge.test.mjs`; served at `/badge/<id>` |
 | Credentials (verify) | `prototype/lib/credential-client.js`, `server.mjs` | ECDSA P-256 over `JSON.stringify(record)` |
 | 3D twin | `index.html`, `src/` | Embed mode is `?embed=1`; the bridge is `src/bridge.js` |
 | Scenario | `scenarios/etch2-pressure-fault.json` | Timeline, reactions, expectations, penalties |
@@ -65,7 +66,7 @@ How the parts talk to each other (postMessage types, director cues, tool names, 
 
 - **Copy or layout on a screen**: edit `prototype/index.html`. Check the page at 1280×800 and 1440×900.
 - **What Sam says or when**: the lines are in `agent/prompt.md` (then run `npm run agent`); the timing is in `prototype/lib/live-call.js`.
-- **Scoring**: `prototype/lib/assessment.js`. Keep the 8 rubric ids (`a1`–`a4`, `v1`–`v4`), or update the dashboard and `docs/INTEGRATION.md` together.
+- **Scoring**: `prototype/lib/assessment.js`. Keep the 8 rubric ids (`a1`–`a4`, `v1`–`v4`) and the 11 competency ids, or update the dashboard, the badge and `docs/INTEGRATION.md` together. Competency levels are signed into the credential, so changing how they're scored means a new `rubric_version`.
 - **A new scenario**: copy `scenarios/etch2-pressure-fault.json`. FabTwin loads it with `?scenario=<name>`. The shell, rubric and Sam's prompt are written for Etch 2, so a new scenario needs all three.
 
 ## Secrets and accounts

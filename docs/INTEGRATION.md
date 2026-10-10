@@ -14,9 +14,11 @@ Scenario: **Etch 2 chamber pressure fault** (`scenarios/etch2-pressure-fault.jso
 
 | Route | What |
 | --- | --- |
-| `/` | FabTwin (unchanged when opened directly) |
+| `/` | The shell (the demo entry point), served from `prototype/index.html` with `<base href="/prototype/">` |
+| `/index.html` | FabTwin on its own |
 | `/index.html?embed=1&dev=0&debug=0` | FabTwin in embed mode (used by the shell iframe) |
-| `/prototype/` | The shell (the demo entry point) |
+| `/prototype/` | The shell (same page as `/`) |
+| `/badge/:id` | The shell opened on the public screen for that credential, with link-preview tags (see Badge). `404` if the id is unknown. |
 | `GET /api/config` | `{ agentId, issuerKeyId }`. The agentId is public because the agent is public for the demo. |
 | `GET /api/issuer-keys` | `{ keys: { "<kid>": <public JWK P-256> } }` |
 | `POST /api/credentials` | Body `{ record }`. Returns `{ id, record, signature, key }` and stores it. |
@@ -30,8 +32,9 @@ Scenario: **Etch 2 chamber pressure fault** (`scenarios/etch2-pressure-fault.jso
 `{ id: "cred_<12 hex>", record: {...}, signature: <base64url raw r||s>, key: <kid> }`.
 `signature = ECDSA P-256 / SHA-256 over UTF-8 bytes of JSON.stringify(record)`, with keys in the exact order the record was given. Node signs with `crypto.sign("sha256", data, { key, dsaEncoding: "ieee-p1363" })`. The browser verifies with `crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"}, key, sig, data)`, choosing the public key by `key` from `/api/issuer-keys`.
 
-Record fields, in this order: `issuer, assessment, scenario_id, company, rubric_version, rubric_approved_by, candidate, role, assessed_at, status, score, max_score, auto_fail, items, signals, evidence_digest`.
+Record fields, in this order: `issuer, assessment, scenario_id, company, rubric_version, rubric_approved_by, candidate, role, assessed_at, status, score, max_score, auto_fail, items, competencies, signals, evidence_digest`.
 - `items`: `{ <rubricId>: boolean }`
+- `competencies`: `{ <competencyId>: 1-5 | null }` in rubric order (rubric `etch-v2` and later). `null` means not assessed. The server accepts records without it, so credentials signed under `etch-v1` still verify; they just have no badge.
 - `signals`: `{ tone_drift, speech_rate_delta_pct, hesitation_score, deescalation_latency_s, composure }`
 - `evidence_digest`: `"sha256:<hex>"` of the JSON transcript and action log
 
@@ -112,12 +115,33 @@ The section names "Procedure" and "Under pressure" replace "Precaution" and "Rec
 - **Auto-fail**: `reset_resume` executed on ETCH-02 (bypassed safety), or an EMO when nobody was in danger.
 - **Pass**: no auto-fail and a score of 6/8 or higher.
 
+### Competencies (rubric `etch-v2`)
+
+Eleven competencies, each scored 1-5, sit next to the 8 checks. They never change pass/fail. Each one adds up weighted indicators to a score out of 100, then bands it: 90+ is 5, 75+ is 4, 55+ is 3, 35+ is 2, otherwise 1. Caps apply after banding. An indicator whose data is missing is skipped and the rest are renormalised. A competency with no data at all is `null` ("Not assessed"), never a 1. Definitions, the anchors at levels 1, 3 and 5, and the scoring are in `COMPETENCIES_ETCH` and `scoreCompetencies()` in `prototype/lib/assessment.js`.
+
+Levels: 1 Not yet, 2 Developing, 3 Proficient, 4 Strong, 5 Exemplary.
+
+| id | group | label | from | `null` when | caps |
+| --- | --- | --- | --- | --- | --- |
+| `procedure` | technical | Following procedure | the scenario's six steps after the alarm, at the scenario's weights; half credit when late | no 3D log | |
+| `deliberate_action` | technical | Deliberate action | checked Etch 2 before the first state change; share of purposeful actions (stray and failed tries count against); hold within 30 s of inspecting; went straight to Etch 2 | no 3D log | reset or EMO: max 2 |
+| `safety_judgment` | technical | Safety judgment | held Etch 2; lot kept off the faulted tool; nothing sent to ETCH-03; no healthy tool held | no 3D log | reset or EMO: 1 |
+| `fab_tools` | technical | Working with semiconductor fab tools | read out the alarm details (by voice or in the note); used Hold; chose ETCH-01; used the terminal; maintenance on the right tool | no 3D log | |
+| `situational_awareness` | technical | Situational awareness | time to reach Etch 2; time to a safe state (hold + reroute); where LOT-4471 ended up | no 3D log or no alarm | |
+| `composure` | behavioural | Composure under pressure | `signals.composure`, with tone drift, hesitation, pace and pushback time as evidence. Voice-based, so labelled that way. | no voice signals | EMO: max 2 |
+| `clarifying_questions` | behavioural | Asking clarifying questions | questions to Sam; checked the Etch 2 screen before answering the reset push; opened the terminal after the alarm | no 3D log | |
+| `problem_solving` | behavioural | Problem solving | contained the fault; moved the lot to ETCH-01; explained the reasoning aloud; raised maintenance | no 3D log | |
+| `integrity` | behavioural | Integrity under pressure | refused push 1; held firm on push 2; acknowledged the pressure; offered a way forward | neither push delivered | reset: 1 |
+| `collaboration` | behavioural | Collaboration and communication | shift-report coverage; spoken updates; written note; maintenance; engaged with Sam | candidate never spoke | |
+| `ownership` | behavioural | Ownership and follow-through | share of spoken commitments carried out; gave a report; the report owns their mistakes | no 3D log, or candidate never spoke | broken promise: max 3 |
+
 ```
 {
   candidate: { name, initials, role: "Equipment Technician", assessed_at },
   scenario: { id: "etch2-pressure-fault", title: "Etch 2 chamber pressure fault", duration_sec },
   result: { status, score, max_score: 8, auto_fail, auto_fail_reason },
   items: { a1: { passed, evidence, t, via: "action"|"voice"|"both", critical? }, ... },
+  competencies: { procedure: { level: 1-5|null, score: 0-100|null, via, evidence: [ { ok: true|false|null, text, t, quote? } ] }, ... },
   timing: {
     pressure: { value, label: "Pressure line to refusal", detail },
     safe:     { value, label: "Alarm to safe state (hold + reroute)", detail },
@@ -131,6 +155,15 @@ The section names "Procedure" and "Under pressure" replace "Precaution" and "Rec
 }
 ```
 `t` is call time in seconds since the call started. Scenario time and call time are aligned at `started`.
+
+## Badge
+
+A credential earns a shareable badge, "Etch Tool Fault Response" (`BADGE_ETCH`), when `status` is `pass`, `auto_fail` is false and the record has `competencies`. `prototype/lib/badge.js` builds everything from the **signed record**, so a shared badge always matches what verifies.
+- **Candidate, Submitted screen**:
+  - A pass shows the badge card and share options: LinkedIn "Add to profile" (Licenses & certifications), a LinkedIn post, X, Facebook, Copy link, Download image (1200×630 PNG drawn in the browser), and the system share sheet where available.
+  - A fail shows a private skills report: the same levels, the two strongest competencies, and the two weakest with the next anchor up. It has no share options.
+- **Share link**: `/badge/<id>`. The server serves the shell with `og:*` and `twitter:card=summary_large_image` tags from `shareHead()`. The title and description name the candidate and their top competencies, and the image is the generic `prototype/badge-og.png`, since crawlers can't read SVG and the server has no image library. A failed or unknown credential gets generic tags and `noindex`, so a link preview never shows a failed result.
+- **Public screen**: when the signature checks out, the badge card appears above the result. A changed record never shows it.
 
 ## File ownership (parallel build)
 

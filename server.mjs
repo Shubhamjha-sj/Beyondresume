@@ -130,6 +130,16 @@ function validateRecord(r) {
   for (const [k, v] of Object.entries(r.items)) {
     if (typeof v !== 'boolean') return `record.items.${k} must be true or false`;
   }
+  // Competency levels (rubric etch-v2 and later). Optional, so older clients and records still work.
+  if (r.competencies !== undefined) {
+    if (!isObj(r.competencies)) return 'record.competencies must be an object';
+    const entries = Object.entries(r.competencies);
+    if (entries.length > 20) return 'record.competencies has more than 20 entries';
+    for (const [k, v] of entries) {
+      if (!/^[a-z_]{1,40}$/.test(k)) return 'record.competencies ids must be lowercase letters and underscores';
+      if (v !== null && !(Number.isInteger(v) && v >= 1 && v <= 5)) return `record.competencies.${k} must be a whole number from 1 to 5, or null`;
+    }
+  }
   if (!isObj(r.signals)) return 'record.signals must be an object';
   for (const f of SIGNAL_FIELDS) {
     const v = r.signals[f];
@@ -502,6 +512,49 @@ async function serveStatic(req, res, url) {
   stream.pipe(res);
 }
 
+// ---------- Shell pages ----------
+
+const escHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+// The product shell with <base>, so its relative URLs resolve from any path; optionally a new title and extra head tags.
+async function shellHtml({ title, head } = {}) {
+  let html = await readFile(join(realRoot, 'prototype', 'index.html'), 'utf8');
+  // Function replacers: the title and tags carry record text, where "$&" or "$1" must stay literal.
+  if (title) html = html.replace(/<title>[\s\S]*?<\/title>/i, () => `<title>${escHtml(title)}</title>`);
+  return html.replace(/<head(\s[^>]*)?>/i, (_, attrs = '') => `<head${attrs}>\n<base href="/prototype/">${head ? '\n' + head : ''}`);
+}
+
+function sendHtml(res, status, html) {
+  res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+  res.end(res.req.method === 'HEAD' ? undefined : html);
+}
+
+// Public origin for absolute links in share tags (Railway terminates TLS and sets x-forwarded-*).
+function originOf(req) {
+  const proto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim() === 'https' ? 'https' : 'http';
+  const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim();
+  return `${proto}://${/^[a-z0-9.-]+(:\d+)?$/i.test(host) ? host : `localhost:${PORT}`}`;
+}
+
+// Loaded on first use, so a broken prototype file can't stop the server starting.
+let badgeLib = null;
+const loadBadgeLib = () => (badgeLib ||= import('./prototype/lib/badge.js').catch(err => { badgeLib = null; throw err; }));
+
+// /badge/<id>: the shell opened on the public badge, with link-preview tags for LinkedIn, X and others.
+async function serveBadge(req, res, id) {
+  const valid = /^cred_[0-9a-f]{12}$/.test(id);
+  if (valid) await refreshSamples();
+  const c = valid ? store.get(id) : null;
+  let page = {};
+  try {
+    const { shareHead } = await loadBadgeLib();
+    page = shareHead(c ? publicView(c) : null, originOf(req));
+  } catch (err) {
+    console.warn(`[badge] share tags skipped: ${err.message}`);
+  }
+  sendHtml(res, c ? 200 : 404, await shellHtml({ title: page.title, head: page.tags }));
+}
+
 // ---------- Server ----------
 
 async function handle(req, res) {
@@ -512,17 +565,17 @@ async function handle(req, res) {
   } catch {
     return sendText(res, 400, 'Bad request');
   }
-  // The product shell is served at the root (its relative URLs resolve via <base>); standalone FabTwin stays at /index.html.
-  if (url.pathname === '/') {
+  // The product shell is served at the root and at /badge/<id> (its relative URLs resolve via <base>); standalone FabTwin stays at /index.html.
+  const badge = url.pathname.match(/^\/badge\/([^/]+)\/?$/);
+  if (url.pathname === '/' || badge) {
     if (req.method !== 'GET' && req.method !== 'HEAD') return sendText(res, 405, 'Method not allowed', { Allow: 'GET, HEAD' });
-    const html = (await readFile(join(realRoot, 'prototype', 'index.html'), 'utf8')).replace(/<head(\s[^>]*)?>/i, '<head$1>\n<base href="/prototype/">');
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
-    return res.end(req.method === 'HEAD' ? undefined : html);
   }
   const isApi = url.pathname === '/api' || url.pathname.startsWith('/api/');
   if (isApi) res.on('finish', () => console.log(`[api] ${req.method} ${url.pathname} ${res.statusCode} ${Date.now() - started}ms`));
   try {
-    if (isApi) await handleApi(req, res, url.pathname);
+    if (url.pathname === '/') sendHtml(res, 200, await shellHtml());
+    else if (badge) await serveBadge(req, res, badge[1]);
+    else if (isApi) await handleApi(req, res, url.pathname);
     else await serveStatic(req, res, url);
   } catch (err) {
     const status = err instanceof HttpError ? err.status : 500;
@@ -557,8 +610,9 @@ async function main() {
   server.listen(PORT, HOST, () => {
     const base = `http://${HOST === '127.0.0.1' || HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`;
     console.log(`IndustryProof demo server on ${base}`);
-    console.log(`  shell:   ${base}/prototype/`);
-    console.log(`  twin:    ${base}/`);
+    console.log(`  shell:   ${base}/`);
+    console.log(`  twin:    ${base}/index.html`);
+    console.log(`  badges:  ${base}/badge/<credential id>`);
     console.log(`  issuer:  ${issuer.kid} (fingerprint ${issuer.fingerprint})`);
     console.log(`  agent:   ELEVENLABS_AGENT_ID ${process.env.ELEVENLABS_AGENT_ID ? 'set' : 'not set (run npm run agent)'}`);
     console.log(`  store:   ${store.size} credential(s) in data/credentials.json`);

@@ -16,9 +16,9 @@ Use the **Company / Candidate / Public** switch in the top right.
 
 | Side | Screens |
 | --- | --- |
-| Company | Overview → Build an assessment (role and site, scenario, review drafts, test and approve, invite) → Review results |
-| Candidate | Briefing → Check-in (camera and consent) → Video call with the AI shift lead → Submitted |
-| Public | Verify a credential by ID, and edit the signed record to see a tampered one fail |
+| Company | Overview → Build an assessment (role and site, scenario, review drafts, test and approve, invite) → Review results (checks plus a 1-5 competency profile with evidence) |
+| Candidate | Briefing → Check-in (camera and consent) → Video call with the AI shift lead → Submitted (a shareable skills badge on a pass, a private skills report otherwise) |
+| Public | Verify a credential by ID or a shared `/badge/<id>` link, and edit the signed record to see a tampered one fail |
 
 ## Notes for wiring it up
 

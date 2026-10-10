@@ -711,6 +711,69 @@ input:disabled,select:disabled,textarea:disabled,.iconbtn:disabled{opacity:.55;c
 .profile .sub .chip{font-size:11px;padding:1px 8px}
 .vresult .kv dd small{color:var(--muted);font-weight:400}
 
+/* Competency profile (company), skills badge (candidate and public) */
+.comp{padding:18px 20px;display:grid;gap:14px}
+.comp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px 18px;flex-wrap:wrap}
+.comp-head p{margin:3px 0 0}
+.comp-avgs{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.comp-avgs strong{color:var(--ink);font-family:var(--font-display);font-weight:300;font-size:22px;margin-left:4px;font-variant-numeric:tabular-nums}
+.comp-grid,.badge-grid,.report-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
+.comp-col{display:grid;align-content:start}
+.comp-col h4,.badge-grid h4,.report-cols h4,.comp-def h4{margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.comp-def h4{margin-top:6px}
+.crow{border-top:1px solid var(--line)}
+.crow > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 0;border-radius:6px}
+.crow > summary::-webkit-details-marker{display:none}
+.crow > summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.crow .nm{font-weight:600;font-size:14px;display:flex;gap:4px 8px;align-items:center;flex-wrap:wrap}
+.crow .lv{display:flex;gap:10px;align-items:center;justify-self:end;font-size:13px;white-space:nowrap}
+.crow .lv b{font-family:var(--font-mono);font-weight:500;font-size:12px;min-width:2.2em;text-align:right}
+.chev{width:14px;height:14px;color:var(--muted);flex:none;transition:transform .2s}
+.crow[open] .chev{transform:rotate(180deg)}
+.pips{display:inline-grid;grid-template-columns:repeat(5,16px);gap:3px;flex:none}
+.pips i{height:7px;border-radius:999px;background:var(--panel-2);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.pips i.on{background:linear-gradient(100deg,var(--lime-a),var(--lime-b));box-shadow:none}
+.cbody{display:grid;gap:10px;padding:0 0 12px;font-size:13px}
+.cbody .def{color:var(--muted);margin:0}
+.cev{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cev li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:8px;align-items:baseline}
+.cev .mk{font-weight:700;text-align:center}
+.cev .mk.ok{color:var(--pass)}
+.cev .mk.no{color:var(--fail)}
+.cev .mk.na{color:var(--muted)}
+.cev .tx{display:flex;gap:4px 7px;flex-wrap:wrap;align-items:baseline}
+.cev q{font-style:italic;color:var(--ink)}
+.anchors{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;padding:10px 12px;background:var(--panel-2);border-radius:10px;font-size:12.5px}
+.anchors dt{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+.anchors dd{margin:0}
+.done{max-width:720px}
+.badge{display:grid;gap:16px;padding:20px;border-radius:var(--r);border:1px solid var(--line-strong);background:radial-gradient(ellipse at 0% 0%,rgba(147,226,127,.14),rgba(0,0,0,0) 55%),var(--panel-2)}
+.badge.report{background:var(--panel-2)}
+.badge h3{font-family:var(--font-display);font-weight:500;font-size:20px;line-height:1.2;margin:3px 0 2px}
+.badge p{margin:4px 0 0}
+.badge-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.badge-top .emblem{width:76px;height:76px}
+.badge-top .who{font-weight:600}
+.badge-top .meta{font-size:12.5px;color:var(--muted)}
+.brow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:13px;padding:6px 0;border-top:1px solid var(--line)}
+.brow b{font-family:var(--font-mono);font-weight:500;font-size:12px;min-width:2.2em;text-align:right}
+.brow.na{color:var(--muted)}
+.badge-foot{display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.badge-foot a,.badge .linkish{color:var(--lime-a);font-weight:700;text-decoration:none}
+.badge-foot a:hover{text-decoration:underline}
+.report-cols ul{margin:0;padding-left:18px;font-size:13px;display:grid;gap:6px}
+.share{display:grid;gap:10px}
+.share-row{display:flex;gap:8px;flex-wrap:wrap}
+.share-row .btn{padding:9px 16px;font-size:13px}
+a.btn{text-decoration:none;color:var(--ink)}
+a.btn.btn-lime{color:var(--lime-ink)}
+.verify .badge{margin-bottom:12px}
+@media (max-width:640px){
+  .comp-grid,.badge-grid,.report-cols{grid-template-columns:minmax(0,1fr)}
+  .badge-top{grid-template-columns:56px minmax(0,1fr)}
+  .badge-top .emblem{width:56px;height:56px}
+}
+
 @media (max-width:980px){
   .stage{grid-template-columns:minmax(0,1fr)}
   .side-col{height:auto!important}
@@ -973,6 +1036,7 @@ input:disabled,select:disabled,textarea:disabled,.iconbtn:disabled{opacity:.55;c
           <dt>Call length</dt><dd class="mono" id="doneLength">00:00</dd>
           <dt>Credential</dt><dd class="mono" id="doneCred"></dd>
         </dl>
+        <div id="doneBadge"></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn btn-lime" data-go="verify" type="button">Verify my credential</button>
           <button class="btn" data-go="dash" type="button">Demo: switch to the company’s view</button>
@@ -1027,7 +1091,8 @@ input:disabled,select:disabled,textarea:disabled,.iconbtn:disabled{opacity:.55;c
 </div>
 
 <script type="module">
-import { RUBRIC_ETCH, RUBRIC_META_ETCH, ACTION_LABELS, SCENARIO_ETCH } from "./lib/assessment.js";
+import { RUBRIC_ETCH, RUBRIC_META_ETCH, ACTION_LABELS, SCENARIO_ETCH, COMPETENCIES_ETCH, COMPETENCY_GROUPS, LEVELS } from "./lib/assessment.js";
+import { badgeModel, shareLinks, badgePng, emblemSVG, competencyGroups } from "./lib/badge.js";
 import { SAMPLE_CANDIDATES, SAMPLE_RUNS } from "./lib/samples.js";
 import { createMicAnalyzer } from "./lib/voice-metrics.js";
 import { mountSignalPanel, describeSignals } from "./lib/signal-panel.js";
@@ -1080,7 +1145,7 @@ const SIDES = {
     nav:[["home","1 · Overview"],["build","2 · Build an assessment"],["dash","3 · Review results"]]},
   candidate:{pill:"Candidate side", desc:"The job applicant: gets a link from the company and takes the assessment as a video call with Sam inside a 3D replica of the fab.",
     nav:[["brief","1 · Briefing"],["lobby","2 · Check-in"],["call","3 · Video call"],["done","4 · Submitted"]]},
-  public:{pill:"Public", desc:"Anyone with the credential ID, such as another employer, can check that the result is real and unchanged.",
+  public:{pill:"Public", desc:"Anyone with the credential ID or a candidate’s badge link, such as another employer, can check that the result is real and unchanged.",
     nav:[["verify","Verify a credential"]]}
 };
 const lastOnSide = {company:"home", candidate:"brief", public:"verify"};
@@ -1490,6 +1555,122 @@ if (window.ResizeObserver) new ResizeObserver(syncSide).observe(callMain);
 window.addEventListener("resize", syncSide);
 window.addEventListener("beforeunload", () => { if (call.live && !call.live.finishing && call.live.conv) call.live.conv.endSession().catch(() => {}); });
 
+/* ---------- Competencies (company), skills badge (candidate and public) ---------- */
+const COMP_BY_ID = Object.fromEntries(COMPETENCIES_ETCH.map(x => [x.id, x]));
+const ICON_CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+const levelsOf = comps => Object.fromEntries(Object.entries(comps || {}).map(([k, x]) => [k, x ? x.level : null]));
+function pipsHTML(level){
+  return '<span class="pips" role="img" aria-label="'+(level ? level+' of 5, '+LEVELS[level] : 'Not assessed')+'">'+
+    [1,2,3,4,5].map(i => '<i'+(level && i <= level ? ' class="on"' : '')+'></i>').join("")+'</span>';
+}
+function evidenceHTML(list){
+  return '<ul class="cev">'+list.map(e => {
+    const mk = e.ok === true ? '<span class="mk ok" aria-label="Met">✓</span>' : e.ok === false ? '<span class="mk no" aria-label="Not met">✗</span>' : '<span class="mk na" aria-label="Note">·</span>';
+    const t = e.t != null ? '<button class="tbtn" type="button" data-t="'+e.t+'">'+mmss(e.t)+'</button>' : '';
+    return '<li>'+mk+'<span class="tx">'+t+'<span>'+esc(e.text)+'</span>'+(e.quote ? '<q>'+esc(e.quote)+'</q>' : '')+'</span></li>';
+  }).join("")+'</ul>';
+}
+function anchorsHTML(def){
+  return '<dl class="anchors">'+[1,3,5].map(l => '<dt>'+l+' · '+esc(LEVELS[l])+'</dt><dd>'+esc(def.anchors[l])+'</dd>').join("")+'</dl>';
+}
+// Company review: every competency with its level, the evidence behind it and the scale anchors.
+function compHTML(c){
+  const comps = c.competencies;
+  if (!comps) return '';
+  const groups = competencyGroups(levelsOf(comps));
+  return '<div class="cut comp"><div class="comp-head"><div><h3>Competency profile</h3><p class="small muted">Scored 1–5 from the evidence below. Shown next to pass/fail, not part of it. Open a row to see why.</p></div>'+
+    '<div class="comp-avgs">'+groups.map(g => '<span>'+esc(g.label)+'<strong>'+(g.avg != null ? g.avg.toFixed(1) : '—')+'</strong></span>').join("")+'</div></div>'+
+    '<div class="comp-grid">'+groups.map(g => '<div class="comp-col"><h4>'+esc(g.label)+'</h4>'+g.items.map(it => {
+      const def = COMP_BY_ID[it.id], x = comps[it.id];
+      const via = def.note ? '<span class="via via-voice">Voice-based</span>' : VIA[x.via] ? '<span class="via via-'+x.via+'">'+VIA[x.via]+'</span>' : '';
+      return '<details class="crow"><summary><span class="nm">'+esc(def.label)+via+'</span><span class="lv">'+pipsHTML(x.level)+'<b>'+(x.level ? x.level+'/5' : '—')+'</b>'+ICON_CHEV+'</span></summary>'+
+        '<div class="cbody"><p class="def">'+esc(def.definition)+(x.level ? ' Scored '+x.score+'/100: '+esc(LEVELS[x.level])+'.' : ' Not assessed in this call.')+'</p>'+
+        evidenceHTML(x.evidence)+anchorsHTML(def)+(def.note ? '<p class="note">'+esc(def.note)+'</p>' : '')+'</div></details>';
+    }).join("")+'</div>').join("")+'</div></div>';
+}
+// Builder, rubric tab: the competency scale the company approves along with the checks.
+function compRubricHTML(){
+  return '<div class="cut sub-card comp-def"><div class="section-head"><h3>Competencies, scored 1–5</h3><span class="mono small muted">'+COMPETENCIES_ETCH.length+' competencies</span></div>'+
+    '<p class="small muted">Scored automatically from the same evidence as the checks, with written anchors so every level can be explained to the candidate. They don’t change pass or fail. A candidate who passes can share them as a badge.</p>'+
+    COMPETENCY_GROUPS.map(g => '<div><h4>'+esc(g.label)+'</h4>'+COMPETENCIES_ETCH.filter(x => x.group === g.id).map(def =>
+      '<details class="crow"><summary><span class="nm">'+esc(def.label)+'</span><span class="lv small muted">'+esc(def.sources.join(" · "))+ICON_CHEV+'</span></summary>'+
+      '<div class="cbody"><p class="def">'+esc(def.definition)+'</p>'+anchorsHTML(def)+(def.note ? '<p class="note">'+esc(def.note)+'</p>' : '')+'</div></details>').join("")+'</div>').join("")+
+  '</div>';
+}
+function groupRowsHTML(groups){
+  return '<div class="badge-grid">'+groups.map(g => '<div><h4>'+esc(g.label)+(g.avg != null ? ' · '+g.avg.toFixed(1) : '')+'</h4>'+
+    g.items.map(it => '<div class="brow'+(it.level ? '' : ' na')+'"><span>'+esc(it.label)+'</span>'+pipsHTML(it.level)+'<b>'+(it.level ? it.level+'/5' : '—')+'</b></div>').join("")+'</div>').join("")+'</div>';
+}
+function badgeCardHTML(m){
+  const meta = [m.issuedOn && "Issued " + m.issuedOn, m.company && m.company + " assessment", m.rubric && "rubric " + m.rubric].filter(Boolean);
+  return '<section class="badge" aria-label="'+esc(m.name)+' badge">'+
+    '<div class="badge-top">'+emblemSVG(76)+'<div><div class="eyebrow">Verified skills badge · '+esc(m.issuer)+'</div><h3>'+esc(m.name)+'</h3>'+
+      '<div class="who">'+esc(m.candidate)+(m.role ? ' · '+esc(m.role) : '')+'</div><div class="meta">'+meta.map(esc).join(" · ")+'</div></div></div>'+
+    groupRowsHTML(m.groups)+
+    (m.credId ? '<div class="badge-foot"><span class="mono">'+esc(m.credId)+'</span>'+(m.url ? '<a href="'+esc(m.url)+'" target="_blank" rel="noopener">View public badge</a>' : '')+'</div>' : '')+
+  '</section>';
+}
+function shareHTML(m){
+  const s = shareLinks(m);
+  const a = (href, label, cls) => '<a class="btn'+(cls ? ' '+cls : '')+'" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+'</a>';
+  return '<div class="share"><div class="eyebrow">Share your badge</div><div class="share-row">'+
+    a(s.linkedinProfile, "Add to LinkedIn profile", "btn-lime")+a(s.linkedinPost, "Post on LinkedIn")+a(s.x, "Post on X")+a(s.facebook, "Facebook")+
+    '<button class="btn" type="button" data-share="copy">Copy link</button><button class="btn" type="button" data-share="png">Download image</button>'+
+    (navigator.share ? '<button class="btn" type="button" data-share="native">More…</button>' : '')+
+    '</div><small class="muted" aria-live="polite" data-share-msg>Only you decide whether to share. The link shows this badge and lets anyone check it’s genuine.</small></div>';
+}
+function bindShare(box, m){
+  const say = t => { $("[data-share-msg]", box).textContent = t; };
+  $$("[data-share]", box).forEach(b => b.addEventListener("click", async () => {
+    const kind = b.dataset.share;
+    if (kind === "copy"){
+      try{ await navigator.clipboard.writeText(m.url); say("Link copied: " + m.url); }
+      catch(e){ say("Copy this link: " + m.url); }
+    } else if (kind === "png"){
+      b.disabled = true; say("Drawing your badge…");
+      try{
+        const url = URL.createObjectURL(await badgePng(m));
+        const link = document.createElement("a");
+        link.href = url; link.download = slugify(m.name) + "-" + m.credId + ".png";
+        document.body.appendChild(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        say("Badge image saved. You can attach it to your post.");
+      }catch(e){ say("Couldn’t draw the image. Try again."); }
+      b.disabled = false;
+    } else if (kind === "native"){
+      try{ await navigator.share({ title: m.name, text: shareLinks(m).text, url: m.url }); }catch(e){ /* closed the share sheet */ }
+    }
+  }));
+}
+// Failed result: the same levels privately, with strengths and what good looks like next time.
+function reportHTML(c){
+  const groups = competencyGroups(levelsOf(c.competencies));
+  const rated = groups.flatMap(g => g.items).filter(x => x.level);
+  const strengths = [...rated].sort((a, b) => b.level - a.level).filter(x => x.level >= 3).slice(0, 2);
+  const work = [...rated].sort((a, b) => a.level - b.level).filter(x => x.level < 5).slice(0, 2);
+  return '<section class="badge report" aria-label="Your skills report"><div><div class="eyebrow">Private · only you can see this</div><h3>Your skills report</h3>'+
+    '<p class="small muted">This result didn’t meet the pass standard for a badge, so there’s nothing to share. Here is how you did, to help you prepare for next time.</p></div>'+
+    groupRowsHTML(groups)+
+    '<div class="report-cols"><div><h4>Strengths</h4>'+(strengths.length ? '<ul>'+strengths.map(x => '<li><strong>'+esc(x.label)+'</strong>, '+x.level+'/5</li>').join("")+'</ul>' : '<p class="small muted">Nothing reached Proficient this time.</p>')+'</div>'+
+    '<div><h4>To work on</h4>'+(work.length ? '<ul>'+work.map(x => '<li><strong>'+esc(x.label)+'</strong>, '+x.level+'/5. What good looks like: '+esc(COMP_BY_ID[x.id].anchors[x.level < 3 ? 3 : 5])+'</li>').join("")+'</ul>' : '<p class="small muted">Nothing below Exemplary.</p>')+'</div></div>'+
+  '</section>';
+}
+// Candidate's Submitted screen: a pass gets the badge and share options (read from the signed
+// record, so what's shared is exactly what verifies); a fail gets the private report.
+function renderDoneBadge(c, id, notIssued){
+  const box = $("#doneBadge");
+  if (!c.competencies){ box.innerHTML = ''; return; }
+  if (c.result.status !== "pass" || c.result.auto_fail){ box.innerHTML = reportHTML(c); return; }
+  const signed = id ? CREDENTIALS[current] : null;
+  const m = signed ? badgeModel(signed, location.origin) : null;
+  if (m && m.eligible){ box.innerHTML = badgeCardHTML(m) + shareHTML(m); bindShare(box, m); return; }
+  const draft = badgeModel({ record: { status:"pass", auto_fail:false, scenario_id:c.scenario.id, candidate:c.candidate.name, role:c.candidate.role,
+    assessed_at:c.candidate.assessed_at, company:SCENARIO_ETCH.company, rubric_version:RUBRIC_META.version, competencies:levelsOf(c.competencies) } });
+  const why = signed ? "This credential was signed before competency scoring, so it can’t be shared as a badge."
+    : notIssued ? "Sharing is available once your credential is issued." : "Loading your signed credential…";
+  box.innerHTML = badgeCardHTML(draft) + '<p class="small muted">'+why+'</p>';
+}
+
 /* ---------- Submitted ---------- */
 const credId = k => (CREDENTIALS[k] || {}).id || "";
 function renderDone(){
@@ -1502,6 +1683,7 @@ function renderDone(){
   $("#doneScenario").textContent = c.scenario.title;
   $("#doneLength").textContent = mmss(c.scenario.duration_sec || 0);
   $("#doneCred").textContent = id || (failed ? "Not issued" : "Loading…");
+  renderDoneBadge(c, id, failed);
 }
 
 /* ---------- Credentials: the server signs and stores them; the page only checks signatures ---------- */
@@ -1516,7 +1698,7 @@ const credsReady = (async () => {
   }));
   if (!$("#s-dash").hidden) renderDashboard();
   if (!$("#s-done").hidden) renderDone();
-  if (!$("#s-verify").hidden && !vLoaded) renderVerify();
+  if (!$("#s-verify").hidden && !vLoaded && !deepLookup) renderVerify();
 })();
 liveFingerprint().then(fp => { $("#vFp").textContent = fp || "(server not reachable)"; });
 
@@ -1607,6 +1789,7 @@ function renderDashboard(){
         '<div class="cut section"><div class="section-head"><h3>'+esc(s)+'</h3><span class="mono muted">'+secScore(s)+'/4</span></div><ul class="items">'+
         bySection(s).map(r => itemHTML(c, r, c.items[r.id])).join("")+'</ul></div>').join("")+
     '</div>'+
+    compHTML(c)+
     '<div class="lower">'+
       '<div class="lower-l">'+
         '<div class="cut timing"><h3>Response timing</h3>'+metric(c.timing.pressure)+metric(c.timing.safe)+
@@ -1628,7 +1811,7 @@ function renderDashboard(){
         }).join("")+
       '</ol></div>'+
     '</div>'+
-    '<div class="cut cred"><div><div class="eyebrow">Credential</div><div class="mono" style="overflow-wrap:anywhere;margin-top:4px">'+esc(credId(current) || (isLive ? "Not issued" + (LIVE.error ? " (" + LIVE.error + ")" : "") : "Loading from the server…"))+'</div><div class="small muted">Signed by IndustryProof. Anyone with the ID can check it. Certifies this assessment, not overall competence.</div></div><button class="btn btn-lime" type="button" data-go="verify">Verify</button></div>';
+    '<div class="cut cred"><div><div class="eyebrow">Credential</div><div class="mono" style="overflow-wrap:anywhere;margin-top:4px">'+esc(credId(current) || (isLive ? "Not issued" + (LIVE.error ? " (" + LIVE.error + ")" : "") : "Loading from the server…"))+'</div><div class="small muted">Signed by IndustryProof. Anyone with the ID can check it. Certifies this assessment, not overall competence.</div><div class="small" style="margin-top:4px">'+(pass ? 'Badge: the candidate can share their competency levels on LinkedIn and other sites.' : 'No badge: the candidate gets a private skills report instead.')+'</div></div><button class="btn btn-lime" type="button" data-go="verify">Verify</button></div>';
 
   $$("#report .tbtn").forEach(b => b.addEventListener("click", () => {
     const want = +b.dataset.t;
@@ -1644,6 +1827,9 @@ function renderDashboard(){
 }
 
 /* ---------- Verify (public) ---------- */
+// A shared badge link (/badge/<id>, served by server.mjs with link-preview tags) opens here on that credential.
+let DEEP_ID = (() => { const m = location.pathname.match(/^\/badge\/([^/]+)\/?$/); try{ return m ? decodeURIComponent(m[1]) : null; }catch(e){ return m[1]; } })();
+let deepLookup = null;   // set once the shared link's credential is being looked up
 function loadCredential(cred){
   vLoaded = cred || null;
   $("#vId").value = cred ? cred.id : "";
@@ -1658,10 +1844,12 @@ function resultFields(r, fp){
     s.composure != null ? "composure " + s.composure : null,
     s.deescalation_latency_s != null ? "pushback " + s.deescalation_latency_s + " s" : null
   ].filter(Boolean).join(" · ") : "";
+  const cg = r.competencies && typeof r.competencies === "object" && !Array.isArray(r.competencies) ? competencyGroups(r.competencies) : null;
   return '<dl class="kv" style="margin-top:12px">'+
     '<dt>Candidate</dt><dd>'+esc(r.candidate || "")+'</dd>'+
     '<dt>Assessment</dt><dd>'+esc(r.assessment || "")+' · '+esc(r.company || "")+'</dd>'+
     '<dt>Result</dt><dd>'+(r.status === "pass" ? "Pass" : "Fail")+', '+esc(r.score)+' of '+esc(r.max_score)+' checks'+(r.auto_fail ? ' · automatic fail' : '')+'</dd>'+
+    (cg ? '<dt>Competencies</dt><dd>'+cg.map(g => esc(g.label)+' '+(g.avg != null ? g.avg.toFixed(1)+'/5' : '—')).join(' · ')+'</dd>' : '')+
     (sig ? '<dt>Voice signals</dt><dd>'+esc(sig)+'</dd>' : '')+
     '<dt>Rubric</dt><dd>'+esc(r.rubric_version || "")+', approved by '+esc(r.rubric_approved_by || "")+'</dd>'+
     '<dt>Issued</dt><dd>'+esc(date)+'</dd>'+
@@ -1685,7 +1873,8 @@ async function runCheck(text, fromEditor){
   }
   if (res.fingerprint) $("#vFp").textContent = res.fingerprint;
   if (res.state === "valid"){
-    out.innerHTML = '<div class="vresult ok">'+ICON_OK+'<div><strong>Valid credential</strong><p>Issued by IndustryProof and unchanged since it was signed.</p>'+resultFields(res.cred.record, res.fingerprint)+'</div></div>';
+    const m = badgeModel(res.cred, location.origin);   // only a valid record shows its badge
+    out.innerHTML = (m.eligible ? badgeCardHTML(m) : '')+'<div class="vresult ok">'+ICON_OK+'<div><strong>Valid credential</strong><p>Issued by IndustryProof and unchanged since it was signed.</p>'+resultFields(res.cred.record, res.fingerprint)+'</div></div>';
   } else if (res.state === "changed"){
     out.innerHTML = '<div class="vresult bad">'+ICON_NO+'<div><strong>This record has been changed</strong><p>The signature doesn’t match the contents, so someone edited it after it was issued. Don’t trust what it says.</p>'+resultFields(res.cred.record)+'</div></div>';
   } else {
@@ -1711,6 +1900,7 @@ async function lookup(){
 }
 async function renderVerify(){
   $("#vLiveLink").hidden = !CREDENTIALS.live;
+  if (DEEP_ID !== null){ $("#vId").value = DEEP_ID; DEEP_ID = null; deepLookup = lookup(); return; }
   let cred = CREDENTIALS[current];
   if (!cred && SAMPLE_KEYS.includes(current)){ await credsReady; cred = CREDENTIALS[current]; }
   if ($("#s-verify").hidden) return;
@@ -2129,7 +2319,8 @@ function step3(){
           (B.approved ? '' : '<button class="add" type="button" data-add="'+esc(sec)+'">+ Add an item</button>')+
         '</div>';
       }).join("")+'</div>'+
-      '<p class="note">A critical fail means the candidate fails however many other items they get right. Use it for unsafe shortcuts.</p>';
+      '<p class="note">A critical fail means the candidate fails however many other items they get right. Use it for unsafe shortcuts.</p>'+
+      (B.scenario === "etch2" ? compRubricHTML() : '');
   }
   return head(3, "Review drafts", "Everything here is a draft. Change anything that doesn't match how your site works.")+
     '<div class="tabs" role="tablist">'+tabs.map(([id,l]) => '<button type="button" role="tab" data-tab="'+id+'" aria-selected="'+(B.tab===id)+'">'+esc(l)+'</button>').join("")+'</div>'+
@@ -2275,7 +2466,7 @@ setCamButtons();
 renderName();
 renderMic();
 renderFab();
-go("home");
+go(DEEP_ID !== null ? "verify" : "home");
 setTimeout(() => fab.load(), 600);   // start loading the 35 MB world early, hidden
 })();
 </script>
