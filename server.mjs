@@ -524,6 +524,30 @@ async function shellHtml({ title, head } = {}) {
   return html.replace(/<head(\s[^>]*)?>/i, (_, attrs = '') => `<head${attrs}>\n<base href="/prototype/">${head ? '\n' + head : ''}`);
 }
 
+// Link-preview tags for the home page, so a shared link to the demo shows a card in Slack, LinkedIn, X and email.
+const SITE_TITLE = 'IndustryProof: Hire talent that handles high-stakes industrial jobs';
+const SITE_DESCRIPTION = 'Candidates face a live crisis on a 3D replica of your site, with an AI shift lead on the call. Every decision becomes a signed, verifiable result.';
+function siteHead(origin) {
+  const meta = (attr, key, value) => `<meta ${attr}="${key}" content="${escHtml(value)}">`;
+  const image = `${origin}/prototype/site-og.jpg`;
+  return [
+    meta('name', 'description', SITE_DESCRIPTION),
+    meta('property', 'og:type', 'website'),
+    meta('property', 'og:site_name', 'IndustryProof'),
+    meta('property', 'og:title', SITE_TITLE),
+    meta('property', 'og:description', SITE_DESCRIPTION),
+    meta('property', 'og:url', `${origin}/`),
+    meta('property', 'og:image', image),
+    meta('property', 'og:image:width', '1200'),
+    meta('property', 'og:image:height', '630'),
+    meta('property', 'og:image:alt', 'IndustryProof: a robot cell with a live fault, and the headline Hire talent that handles high-stakes industrial jobs'),
+    meta('name', 'twitter:card', 'summary_large_image'),
+    meta('name', 'twitter:title', SITE_TITLE),
+    meta('name', 'twitter:description', SITE_DESCRIPTION),
+    meta('name', 'twitter:image', image),
+  ].join('\n');
+}
+
 function sendHtml(res, status, html) {
   res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
   res.end(res.req.method === 'HEAD' ? undefined : html);
@@ -573,7 +597,7 @@ async function handle(req, res) {
   const isApi = url.pathname === '/api' || url.pathname.startsWith('/api/');
   if (isApi) res.on('finish', () => console.log(`[api] ${req.method} ${url.pathname} ${res.statusCode} ${Date.now() - started}ms`));
   try {
-    if (url.pathname === '/') sendHtml(res, 200, await shellHtml());
+    if (url.pathname === '/') sendHtml(res, 200, await shellHtml({ head: siteHead(originOf(req)) }));
     else if (badge) await serveBadge(req, res, badge[1]);
     else if (isApi) await handleApi(req, res, url.pathname);
     else await serveStatic(req, res, url);
