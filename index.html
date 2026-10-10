@@ -16,6 +16,13 @@
   </script>
 </head>
 <body>
+  <script>
+    // ?embed=1 (inside the call screen): style for it before main.js loads, so the name field never flashes.
+    (function () {
+      var p = new URLSearchParams(location.search);
+      if (p.has('embed') && p.get('embed') !== '0') document.body.classList.add('is-embed');
+    })();
+  </script>
   <canvas id="scene"></canvas>
 
   <!-- In-world HUD (visible while walking) -->
@@ -62,6 +69,7 @@
         <p id="loading-text">Loading the fab…</p>
       </div>
 
+      <p id="embed-status" class="is-hidden"></p>
       <p id="error" class="is-hidden"></p>
 
       <button id="enter" disabled>Begin shift</button>

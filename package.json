@@ -5,7 +5,9 @@
   "description": "Walkable semiconductor-fab digital twin for assessing candidates",
   "type": "module",
   "scripts": {
-    "start": "npx --yes serve -l 5173",
-    "test": "node tests/scenario.test.mjs"
+    "start": "node server.mjs",
+    "keys": "node scripts/gen-issuer-key.mjs",
+    "agent": "node scripts/create-agent.mjs",
+    "test": "node tests/scenario.test.mjs && node tests/voice-metrics.test.mjs && node tests/assessment.test.mjs && node tests/bridge.test.mjs"
   }
 }

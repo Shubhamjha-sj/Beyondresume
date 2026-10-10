@@ -1,5 +1,21 @@
 # FabTwin – cleanroom readiness assessment
 
+## Live demo (IndustryProof + FabTwin + Sam)
+
+```bash
+npm start                  # node server.mjs on http://localhost:5173
+```
+
+Open http://localhost:5173/prototype/ in Chrome, use headphones, and pick **Take it yourself** on the Etch 2 card.
+The call screen embeds FabTwin (`/index.html?embed=1`). Sam, the AI shift lead, is an ElevenLabs agent
+(gpt-6-luna, Adam voice) set up by `npm run agent`. Results are signed as ECDSA P-256 credentials by the
+server and can be checked on the Public screen. The contract between the parts is in `docs/INTEGRATION.md`.
+
+`.env.local` (not committed):
+- `ELEVENLABS_AGENT_ID`: the public agent id. Without it the call plays a scripted sample.
+- `ISSUER_PRIVATE_JWK` and `ISSUER_KEY_ID`: created by `npm run keys`, or automatically when the server starts.
+- `ELEVENLABS_API_KEY`: needed only for `npm run agent`.
+
 A walkable digital twin of a semiconductor fab bay (generated with World Labs Marble) where
 candidates handle a live equipment fault. Everything they do is logged and scored.
 

@@ -1,0 +1,124 @@
+{
+  "name": "Sam - Bay 3 shift lead (FabTwin)",
+  "tags": ["fabtwin", "industryproof", "hackathon"],
+
+  "agent": {
+    "first_message": "Morning. You're covering Bay 3 today. I'll be on the line if you need me.",
+    "language": "en",
+    "max_conversation_duration_message": "We're out of time. Thanks, that's all for today.",
+    "llm": "gpt-6-luna",
+    "reasoning_effort": "none",
+    "temperature": 0.3
+  },
+
+  "tts": {
+    "model_id": "eleven_v4_turbo",
+    "voice_id": "pNInz6obpgDQGcFmaJgB",
+    "voice_name": "Adam",
+    "stability": 0.45,
+    "similarity_boost": 0.8,
+    "speed": 1.05,
+    "expressive_mode": false
+  },
+
+  "asr": {
+    "keywords": ["Etch", "reroute", "maintenance", "hold", "EMO", "chamber", "terminal", "lot", "millitorr"]
+  },
+
+  "turn": {
+    "turn_timeout": 30,
+    "turn_eagerness": "normal"
+  },
+
+  "conversation": {
+    "max_duration_seconds": 360,
+    "client_events": [
+      "conversation_initiation_metadata",
+      "ping",
+      "audio",
+      "interruption",
+      "user_transcript",
+      "agent_response",
+      "agent_response_correction",
+      "client_tool_call",
+      "agent_tool_response",
+      "vad_score"
+    ]
+  },
+
+  "platform": {
+    "public": true
+  },
+
+  "system_tools": ["skip_turn"],
+
+  "client_tools": [
+    {
+      "name": "mark_pressure",
+      "description": "Timestamps a pressure moment. Call it in the same turn as you deliver pressure line n: n=1 for the reset-and-resume push (PRESSURE_1 cue), n=2 for the keep-the-hot-lot-on-Etch-2 push (PRESSURE_2 cue). Call it exactly once per pressure line.",
+      "expects_response": false,
+      "execution_mode": "immediate",
+      "pre_tool_speech": "off",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "n": { "type": "integer", "description": "Which pressure line you are delivering: 1 or 2." }
+        },
+        "required": ["n"]
+      }
+    },
+    {
+      "name": "log_candidate_stance",
+      "description": "Records how the candidate answered a pressure line. Call it right after the candidate's answer to pressure line 1 or 2, in the same turn as your reply.",
+      "expects_response": false,
+      "execution_mode": "immediate",
+      "pre_tool_speech": "off",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pressure": { "type": "integer", "description": "Which pressure line the candidate is answering: 1 or 2." },
+          "stance": {
+            "type": "string",
+            "enum": ["refused", "complied", "unclear"],
+            "description": "refused: they decline the shortcut or keep the lot off Etch 2. complied: they agree to do what you pushed for. unclear: no clear decision."
+          },
+          "quote": { "type": "string", "description": "The candidate's own words that show the stance, copied from what they said, at most 30 words." }
+        },
+        "required": ["pressure", "stance", "quote"]
+      }
+    },
+    {
+      "name": "log_verbal_commitment",
+      "description": "Records that the candidate (the human operator) said they will do, or have done, one of the listed fab actions. Call it only when replying to a candidate message that says so, once per action. Never for [FAB EVENT] or [FAB STATE] messages or for your own lines.",
+      "expects_response": false,
+      "execution_mode": "immediate",
+      "pre_tool_speech": "off",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["inspect", "ack_alarm", "hold_tool", "reroute", "call_maintenance", "notify_supervisor", "reset_resume", "emo"],
+            "description": "inspect: check the tool's screen or alarm details. ack_alarm: acknowledge the alarm. hold_tool: put a tool on hold or stop it. reroute: move a lot to another tool. call_maintenance: call maintenance or open a ticket. notify_supervisor: message or update the supervisor. reset_resume: reset the alarm and resume processing. emo: press the emergency off."
+          },
+          "quote": { "type": "string", "description": "The candidate's own words, copied word for word from their message, at most 30 words." }
+        },
+        "required": ["action", "quote"]
+      }
+    },
+    {
+      "name": "end_exercise",
+      "description": "Ends the exercise. Call it after the candidate has answered the shift-report question and you have thanked them.",
+      "expects_response": false,
+      "execution_mode": "post_tool_speech",
+      "pre_tool_speech": "off",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reason": { "type": "string", "description": "Short reason, for example: debrief complete." }
+        },
+        "required": ["reason"]
+      }
+    }
+  ]
+}

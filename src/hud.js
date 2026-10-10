@@ -48,6 +48,12 @@ export class Hud {
     this.subTimer = setTimeout(() => this.subEl.classList.add('is-hidden'), ms);
   }
 
+  // A line spoken somewhere else (embed mode: Sam on the call). Stays up about as long as it takes to read.
+  showSubtitleFor(speaker, text, ms = Math.min(12000, 2500 + String(text).length * 60)) {
+    this.showSubtitle(speaker, text);
+    this.hideSubtitleSoon(ms);
+  }
+
   toast(message, ms = 2200) {
     this.toastEl.textContent = message;
     this.toastEl.classList.remove('is-hidden');

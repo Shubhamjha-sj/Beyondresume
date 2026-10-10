@@ -4,7 +4,12 @@ const params = new URLSearchParams(location.search);
 const num = (key, fallback) => (params.has(key) ? Number(params.get(key)) : fallback);
 const flag = (key, fallback) => (params.has(key) ? params.get(key) !== '0' : fallback);
 
+// ?embed=1: running inside the IndustryProof call screen (an iframe). FabTwin then talks to the
+// page around it through src/bridge.js, never speaks lines itself and shows no results page.
+const embed = flag('embed', false);
+
 export const CONFIG = {
+  embed,
   // Assets (generated from the Marble export; see tools/build_navgrid.py)
   worldUrl: './assets/fab.spz',
   navGridUrl: './assets/navgrid.json',
@@ -25,8 +30,11 @@ export const CONFIG = {
   pixelRatio: num('dpr', Math.min(window.devicePixelRatio || 1, 1.25)),
   lod: flag('lod', false), // Spark level-of-detail; try ?lod=1 if the frame rate is low
 
-  // Dev helpers (turn off for real candidates with ?dev=0&debug=0)
-  dev: flag('dev', true), // dev keys: N noclip, P copy position, J skip 15 s, ` read-out
+  // Sound level for everything FabTwin plays. Embedded, the call's voice comes first; try ?vol=0.4
+  volume: num('vol', embed ? 0.6 : 1),
+
+  // Dev helpers (turn off for real candidates with ?dev=0&debug=0; always off when embedded)
+  dev: !embed && flag('dev', true), // dev keys: N noclip, P copy position, J skip 15 s, ` read-out
   noclip: flag('noclip', false), // walk through everything
-  debug: flag('debug', true), // position read-out top-left
+  debug: !embed && flag('debug', true), // position read-out top-left
 };

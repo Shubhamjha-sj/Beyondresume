@@ -4,12 +4,15 @@ import * as THREE from 'three';
 // cleanroom air-handling hum, tool alarm horn, overhead-vehicle whir, UI blips, EMO siren.
 // Positional sounds use three.js PositionalAudio, so they get louder as you walk closer.
 // Voice lines use the browser's built-in speech synthesis, with subtitles.
+// With { speech: false } (embed mode, where the call has a real voice) say() only shows the subtitle.
 
 export class AudioManager {
-  constructor(camera) {
+  constructor(camera, { speech = true, volume = 1 } = {}) {
     this.listener = new THREE.AudioListener();
     camera.add(this.listener);
+    if (Number.isFinite(volume) && volume !== 1) this.listener.setMasterVolume(volume);
     this.ctx = this.listener.context;
+    this.speech = speech && 'speechSynthesis' in window;
     this.buffers = {
       hum: makeHum(this.ctx),
       alarm: makeAlarm(this.ctx),
@@ -25,7 +28,7 @@ export class AudioManager {
     this.onSubtitle = null; // (speaker, text) => void
     this.onSubtitleEnd = null; // () => void
 
-    if ('speechSynthesis' in window) {
+    if (this.speech) {
       const load = () => (this.voices = window.speechSynthesis.getVoices());
       load();
       window.speechSynthesis.addEventListener?.('voiceschanged', load);
@@ -50,17 +53,17 @@ export class AudioManager {
 
   suspend() {
     this.ctx.suspend?.().catch(() => {});
-    if ('speechSynthesis' in window) window.speechSynthesis.pause();
+    if (this.speech) window.speechSynthesis.pause();
   }
 
   resume() {
     this.ctx.resume?.().catch(() => {});
-    if ('speechSynthesis' in window) window.speechSynthesis.resume();
+    if (this.speech) window.speechSynthesis.resume();
   }
 
   stopAll() {
     for (const id of [...this.alarms.keys()]) this.stopAlarm(id);
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if (this.speech) window.speechSynthesis.cancel();
   }
 
   // Looping sound attached to a 3D object (it moves with the object).
@@ -107,7 +110,7 @@ export class AudioManager {
 
   say(text, speaker = 'Supervisor') {
     const done = () => this.onSubtitleEnd?.();
-    if (!('speechSynthesis' in window)) {
+    if (!this.speech) {
       this.onSubtitle?.(speaker, text);
       setTimeout(done, 1500 + text.length * 55);
       return;
