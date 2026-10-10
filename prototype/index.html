@@ -1,0 +1,1864 @@
+<title>IndustryProof Cleanroom Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300..600&family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: dark app shell in a rounded frame. Briefing = big wide headline + site "video" with fanned cards. Call = large AI agent tile with glass orb and captions, site view + transcript at the side, self-view PiP. Review = hairline panels with a cut corner. Single dark theme by design. */
+:root{
+  color-scheme:dark;
+  --bg:#0A0B0D;
+  --frame:#111316;
+  --panel:#16191D;
+  --panel-2:#1E2227;
+  --line:#2A2F36;
+  --line-strong:#3B424B;
+  --ink:#F1F3F4;
+  --muted:#9AA2AA;
+  --lime-a:#E4F35C;
+  --lime-b:#93E27F;
+  --lime-ink:#11160A;
+  --ice:#86C2F4;
+  --ice-deep:#2B66AE;
+  --coral-a:#F7A58C; --coral-b:#E9708C;
+  --teal-a:#6DE6CF; --teal-b:#3AAED6;
+  --silver-a:#EEF1F4; --silver-b:#AEB7C2;
+  --card-ink:#14171B;
+  --pass:#86E3AE; --pass-bg:#122A1E;
+  --fail:#FF7E6E; --fail-bg:#2E1512;
+  --warn:#F4C766; --warn-bg:#2C2410;
+  --focus:#86C2F4;
+  --font-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --font-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r-frame:28px;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--font-display);font-weight:300;font-size:clamp(30px,3.7vw,54px);line-height:1.08;letter-spacing:-.015em}
+h2{font-family:var(--font-display);font-weight:500;font-size:clamp(20px,2.4vw,26px);line-height:1.2}
+h3{font-family:var(--font-body);font-weight:700;font-size:15px}
+p{margin:0}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+
+/* Frame + top bar */
+.shell{max-width:1320px;margin:0 auto;padding-inline:16px;padding-block:16px 40px}
+.frame{background:var(--frame);border:1px solid var(--line);border-radius:var(--r-frame);overflow:hidden}
+.topbar{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap;padding:10px 22px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:500;font-size:17px}
+.brand svg{width:26px;height:26px}
+.brand small{font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.journey{display:flex;gap:4px;flex-wrap:wrap;list-style:none;margin:0 0 0 auto;padding:0}
+.journey button{display:flex;align-items:center;gap:8px;border:1px solid transparent;background:none;border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.journey button:hover{color:var(--ink);border-color:var(--line)}
+.journey .n{font-family:var(--font-mono);font-size:11px}
+.journey button[aria-current="step"]{background:var(--panel-2);color:var(--ink);border-color:var(--line-strong)}
+.journey button[aria-current="step"] .n{color:var(--lime-a)}
+.journey .split{width:1px;background:var(--line);margin:4px 6px}
+.screen{padding:22px 22px 36px}
+.view-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.view-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime-b)}
+
+/* Buttons + chips */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:11px 20px;font-weight:600;font-size:14px;border:1px solid var(--line-strong);background:var(--panel-2)}
+.btn:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-lime{background:linear-gradient(100deg,var(--lime-a),var(--lime-b));color:var(--lime-ink);border-color:transparent}
+.btn-lime:hover{filter:brightness(1.05)}
+.btn-red{background:var(--fail);color:#1A0805;border-color:transparent}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;background:var(--panel-2);border:1px solid var(--line);white-space:nowrap}
+.chip.pass{background:var(--pass-bg);color:var(--pass);border-color:transparent}
+.chip.fail{background:var(--fail-bg);color:var(--fail);border-color:transparent}
+.chip.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+
+/* Hairline panel with a cut corner */
+.cut{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,0 100%)}
+.cut::after{content:"";position:absolute;top:-1px;right:-1px;width:27px;height:27px;background:linear-gradient(to bottom left,transparent calc(50% - .8px),var(--line-strong) 50%,transparent calc(50% + .8px));pointer-events:none}
+
+/* ---------- 1. Briefing ---------- */
+.hero-top{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:20px 40px;align-items:end}
+.hero-top .eyebrow{margin-bottom:16px}
+.hero-side{display:grid;gap:20px;justify-items:start;padding-bottom:8px}
+.hero-side p{color:var(--muted);font-size:16px;max-width:42ch}
+.hero-stage{position:relative;margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:20px;align-items:end}
+.hero-video{position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--line);height:clamp(220px,34vh,380px);max-width:100%;background:var(--panel)}
+.hero-video img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:60% 50%;animation:pan 22s ease-in-out infinite alternate}
+@keyframes pan{from{transform:scale(1.04) translateX(0)}to{transform:scale(1.14) translateX(-3%)}}
+.hero-video::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,13,.0) 40%,rgba(10,11,13,.75) 100%);pointer-events:none}
+.video-tags{position:absolute;top:14px;left:14px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+.video-tags .chip{background:rgba(10,11,13,.65);backdrop-filter:blur(8px);border-color:rgba(255,255,255,.14)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--fail)}
+.fan{position:absolute;left:28px;bottom:-26px;display:flex;z-index:3}
+.fcard{width:200px;min-height:150px;border-radius:20px;padding:16px 20px 16px 16px;color:var(--card-ink);display:grid;gap:8px;align-content:start;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.fcard .num{font-family:var(--font-mono);font-size:12px;opacity:.7}
+.fcard h3{font-family:var(--font-display);font-weight:500;font-size:16px;line-height:1.2}
+.fcard p{font-size:12.5px;line-height:1.45;opacity:.8}
+.fcard.c1{background:linear-gradient(150deg,var(--coral-a),var(--coral-b));transform:rotate(-7deg)}
+.fcard.c2{background:linear-gradient(150deg,var(--teal-a),var(--teal-b));transform:rotate(-1deg) translateY(10px);margin-left:-8px}
+.fcard.c3{background:linear-gradient(150deg,var(--silver-a),var(--silver-b));transform:rotate(6deg) translateY(22px);margin-left:-8px}
+.stat{display:grid;gap:8px;padding-bottom:6px}
+.stat .big{font-family:var(--font-display);font-weight:300;font-size:clamp(40px,4.4vw,60px);line-height:1}
+.stat .lbl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.stat .lbl::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime-b);flex:none}
+.scen-strip{margin-top:72px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:18px 22px}
+.scen-strip .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+
+/* ---------- 2. Check-in lobby ---------- */
+.lobby{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:center}
+.preview{position:relative;aspect-ratio:16/10;max-width:100%;border-radius:22px;overflow:hidden;background:var(--panel);border:1px solid var(--line)}
+.preview video,.pip video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1)}
+.cam-off{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:12px;text-align:center;padding:16px;background:radial-gradient(circle at 50% 40%,var(--panel-2),var(--panel) 70%)}
+.face{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display);font-size:30px;background:linear-gradient(150deg,var(--silver-a),var(--silver-b));color:var(--card-ink)}
+.cam-msg{font-size:13px;color:var(--muted);max-width:36ch}
+.preview-name{position:absolute;left:14px;bottom:14px;font-size:13px;font-weight:600;background:rgba(10,11,13,.6);padding:4px 10px;border-radius:999px}
+.round-ctrls{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:10px}
+.rbtn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);background:rgba(22,25,29,.85);backdrop-filter:blur(8px)}
+.rbtn svg{width:20px;height:20px}
+.rbtn.off{background:var(--fail);color:#1A0805;border-color:transparent}
+.join{padding:26px;display:grid;gap:18px}
+.waiting{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--panel-2)}
+.mini-orb{width:34px;height:34px;border-radius:50%;flex:none;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.9) 0 6%,rgba(255,255,255,0) 22%),radial-gradient(circle,var(--ice) 0%,var(--ice-deep) 60%,#07121F 100%);box-shadow:0 0 18px rgba(134,194,244,.45)}
+.checklist{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:14px}
+.checklist li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px}
+.checklist .st{width:18px;height:18px;border-radius:50%;margin-top:2px;border:1.5px solid var(--line-strong)}
+.checklist .st.ok{background:var(--lime-b);border-color:transparent}
+.consent{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;font-size:14px;align-items:start;color:var(--muted)}
+.consent input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--lime-b)}
+
+/* ---------- 3. Call ---------- */
+.callbar{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;margin-bottom:14px}
+.rec{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--fail)}
+.rec .live-dot{animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.callbar .title{font-weight:600}
+.phases{display:flex;gap:4px;list-style:none;margin:0 0 0 auto;padding:0;flex-wrap:wrap}
+.phases li{font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;color:var(--muted);border:1px solid var(--line)}
+.phases li.done{color:var(--ink)}
+.phases li.on{background:linear-gradient(100deg,var(--lime-a),var(--lime-b));color:var(--lime-ink);border-color:transparent}
+.clock{font-size:15px;color:var(--muted)}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:stretch}
+.main-col{display:grid;gap:14px;min-width:0;align-content:start}
+.agent-tile{position:relative;border-radius:24px;overflow:hidden;border:1px solid var(--line);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px 22px;padding:18px 20px;background:radial-gradient(ellipse at 12% 50%,rgba(43,102,174,.38),rgba(10,11,13,0) 55%),var(--panel)}
+.agent-tile.speaking{border-color:var(--ice-deep)}
+.agent-body{display:grid;gap:10px;min-width:0}
+.agent-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.agent-head .nm{font-family:var(--font-display);font-weight:500;font-size:18px}
+.agent-head .rl{font-size:13px;color:var(--muted)}
+.speak-tag{margin-left:auto;font-size:12px;font-weight:600;color:var(--ice);display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .2s}
+.agent-tile.speaking .speak-tag{opacity:1}
+.speak-tag i{width:3px;height:10px;background:var(--ice);border-radius:2px;animation:eq .8s infinite ease-in-out}
+.speak-tag i:nth-child(2){animation-delay:.15s}.speak-tag i:nth-child(3){animation-delay:.3s}
+@keyframes eq{50%{height:3px}}
+.orb-zone{display:grid;place-items:center}
+.orb-wrap{position:relative;width:150px;aspect-ratio:1;max-width:100%}
+.orb-wrap svg{position:absolute;inset:0;width:100%;height:100%}
+.ring-a{transform-origin:100px 100px;animation:spin 40s linear infinite}
+.ring-b{transform-origin:100px 100px;animation:spin 26s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orb{position:absolute;inset:17%;border-radius:50%;
+  background:
+    radial-gradient(circle at 34% 28%,rgba(255,255,255,.95) 0 3%,rgba(255,255,255,0) 15%),
+    radial-gradient(circle at 66% 72%,rgba(147,226,127,.5),rgba(147,226,127,0) 38%),
+    radial-gradient(circle at 50% 50%,var(--ice) 0%,var(--ice-deep) 52%,#07121F 100%);
+  box-shadow:0 0 calc(34px + var(--amp,0) * 70px) rgba(134,194,244,calc(.22 + var(--amp,0) * .45)),inset 0 0 36px rgba(255,255,255,.2),inset 0 -18px 40px rgba(0,0,0,.45);
+  transform:scale(calc(1 + var(--amp,0) * .05));transition:transform .1s linear,box-shadow .1s linear}
+.caption{min-height:92px;display:grid;gap:6px;align-content:start}
+.caption .who{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ice)}
+.caption .who.cand{color:var(--lime-a)}
+.caption p{font-size:clamp(17px,1.9vw,22px);line-height:1.4;max-width:46ch;font-weight:500}
+.caption[hidden]{display:none!important}
+.pip{position:relative;width:180px;aspect-ratio:4/3;border-radius:16px;overflow:hidden;border:2px solid var(--line-strong);background:var(--panel-2);box-shadow:0 10px 30px rgba(0,0,0,.5);transition:border-color .2s}
+.pip.talking{border-color:var(--lime-b)}
+.pip .cam-off .face{width:44px;height:44px;font-size:15px}
+.pip .cam-off{gap:6px}
+.pip-name{position:absolute;left:8px;bottom:8px;font-size:11px;font-weight:600;background:rgba(10,11,13,.6);padding:2px 8px;border-radius:999px}
+.site-tile{position:relative;border-radius:24px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+.site-tile img{display:block;width:100%;aspect-ratio:2.05/1;object-fit:cover;max-width:100%}
+.site-top{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.site-top .chip{background:rgba(10,11,13,.7);backdrop-filter:blur(8px);border-color:rgba(255,255,255,.14)}
+.site-top .chip.fail,.site-top .chip.pass{border-color:transparent}
+.site-top .chip.fail{background:var(--fail-bg)}
+.site-top .chip.pass{background:var(--pass-bg)}
+.site-note{padding:10px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.tpanel{border-radius:20px;border:1px solid var(--line);background:var(--panel);display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0}
+.tpanel-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.stream{overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;max-height:640px}
+.stream:empty::before{content:"The transcript appears here as you talk.";color:var(--muted);font-size:13px}
+.msg{display:grid;gap:2px;max-width:92%}
+.msg .who{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px}
+.msg .bubble{padding:8px 11px;border-radius:12px;font-size:13.5px;background:var(--panel-2)}
+.msg.cand{justify-self:end}
+.msg.cand .who{justify-content:flex-end}
+.msg.cand .bubble{background:linear-gradient(100deg,var(--lime-a),var(--lime-b));color:var(--lime-ink)}
+.controls{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding:12px;border-radius:999px;background:var(--panel);border:1px solid var(--line);width:fit-content;max-width:100%;margin-inline:auto}
+.controls .rbtn{background:var(--panel-2)}
+.controls .rbtn.on{background:var(--ink);color:var(--bg)}
+.controls .sep{width:1px;height:28px;background:var(--line)}
+.demo-skip{font-size:12px;padding:8px 14px}
+
+/* ---------- 4. Submitted ---------- */
+.done-wrap{display:grid;place-items:center;padding-block:20px}
+.done{max-width:580px;width:100%;padding:34px;display:grid;gap:18px}
+.tick{width:52px;height:52px;border-radius:50%;background:linear-gradient(140deg,var(--lime-a),var(--lime-b));color:var(--lime-ink);display:grid;place-items:center}
+.tick svg{width:26px;height:26px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 22px;font-size:14px;margin:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+
+/* ---------- 5. Employer review ---------- */
+.dash{display:grid;grid-template-columns:250px minmax(0,1fr);gap:18px;align-items:start}
+.rail{padding:10px;display:grid;gap:4px}
+.rail-head{padding:8px 10px 10px;display:grid;gap:2px}
+.cand-btn{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;text-align:left;border:1px solid transparent;background:none;border-radius:12px;padding:10px}
+.cand-btn:hover{background:var(--panel-2)}
+.cand-btn[aria-pressed="true"]{background:var(--panel-2);border-color:var(--line-strong)}
+.cand-btn .nm{font-weight:600}
+.cand-btn .rl{font-size:12px;color:var(--muted);grid-column:1}
+.cand-btn .chip{grid-row:1 / span 2;grid-column:2;align-self:center}
+.report{display:grid;gap:14px;min-width:0}
+.profile{padding:20px 22px;display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:18px;align-items:center}
+.photo{width:72px;height:72px;border-radius:18px;background:linear-gradient(150deg,var(--silver-a),var(--silver-b));color:var(--card-ink);display:grid;place-items:center;font-family:var(--font-display);font-size:22px;position:relative;overflow:visible}
+.photo img{width:100%;height:100%;object-fit:cover;border-radius:18px;transform:scaleX(-1)}
+.idok{position:absolute;right:-6px;bottom:-6px;width:24px;height:24px;border-radius:50%;background:var(--lime-b);color:var(--lime-ink);display:grid;place-items:center;border:2px solid var(--panel)}
+.idok svg{width:12px;height:12px}
+.profile .sub{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--muted);margin-top:6px}
+.result{padding:22px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:26px;align-items:center}
+.verdict{font-family:var(--font-display);font-weight:300;font-size:clamp(44px,5vw,64px);line-height:1}
+.verdict.pass{color:var(--pass)}
+.verdict.fail{color:var(--fail)}
+.scorebar{display:grid;gap:10px}
+.segs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
+.segs i{height:10px;border-radius:999px;background:var(--panel-2)}
+.segs i.p{background:linear-gradient(100deg,var(--lime-a),var(--lime-b))}
+.segs i.f{background:var(--fail-bg);box-shadow:inset 0 0 0 1px var(--fail)}
+.scoreline{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px}
+.autofail{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px;padding:14px 18px;border-radius:var(--r);background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail)}
+.autofail svg{width:22px;height:22px}
+.autofail strong{display:block}
+.autofail p{color:var(--ink);font-size:14px}
+.sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.section{padding:18px 20px;display:grid;gap:14px;align-content:start}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.items{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.item{display:grid;grid-template-columns:22px minmax(0,1fr);gap:11px}
+.item .ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center}
+.item .ic svg{width:12px;height:12px}
+.item.p .ic{background:var(--pass-bg);color:var(--pass)}
+.item.f .ic{background:var(--fail-bg);color:var(--fail)}
+.item .lbl{font-weight:600;font-size:14px}
+.item .ev{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-top:3px}
+.item .ev q{font-style:italic}
+.tbtn{font-family:var(--font-mono);font-size:11.5px;border:1px solid var(--line-strong);background:var(--panel-2);border-radius:6px;padding:1px 7px}
+.tbtn:hover{border-color:var(--ice)}
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:14px;align-items:start}
+.timing{padding:18px 20px;display:grid;gap:14px}
+.metric{display:grid;gap:3px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.metric .v{font-family:var(--font-display);font-weight:300;font-size:32px;font-variant-numeric:tabular-nums}
+.metric .v.bad{color:var(--fail)}
+.metric .k{font-size:13px;color:var(--muted)}
+.context{display:grid;gap:8px}
+.context .row{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.note{font-size:12px;color:var(--muted);padding:9px 11px;background:var(--panel-2);border-radius:10px}
+.transcript{padding:18px 20px;display:grid;gap:10px}
+.tlines{list-style:none;margin:0;padding:0;display:grid;gap:2px;max-height:520px;overflow-y:auto}
+.tline{display:grid;grid-template-columns:48px 76px minmax(0,1fr);gap:8px;padding:8px 9px;border-radius:10px;font-size:14px;transition:background .4s}
+.tline .t{font-size:11.5px;color:var(--muted);padding-top:2px}
+.tline .sp{font-size:12px;font-weight:600;color:var(--muted);padding-top:1px}
+.tline.scored{background:var(--warn-bg)}
+.tline .tag{display:block;font-size:11px;font-weight:700;color:var(--warn);margin-top:3px}
+.tline.flash{background:var(--ice-deep)}
+.tline.flash .t,.tline.flash .sp{color:var(--ink)}
+.cred{padding:18px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center}
+
+/* ---------- 6. Verify ---------- */
+.verify{max-width:720px;margin:0 auto}
+.vcard{padding:26px;display:grid;gap:20px}
+.seal{display:flex;gap:16px;align-items:center}
+.seal .mini-orb{width:46px;height:46px}
+.tamper{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:14px 16px;border:1px dashed var(--line-strong);border-radius:14px}
+.switch{position:relative;width:46px;height:26px}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--panel-2);border:1px solid var(--line-strong);transition:background .2s;pointer-events:none}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.switch input:checked + span{background:var(--fail-bg);border-color:var(--fail)}
+.switch input:checked + span::after{transform:translateX(20px);background:var(--fail)}
+.switch input:focus-visible + span{outline:2px solid var(--focus);outline-offset:2px}
+.tampered{color:var(--fail);font-weight:700}
+.vinline{margin:10px 0 0;font-size:13px;font-weight:600;color:var(--muted);min-height:1.2em}
+.vinline.ok{color:var(--pass)}
+.vinline.bad{color:var(--fail)}
+#btnVerify:active,#btnLookup:active{transform:translateY(1px)}
+.vjson{font-family:var(--font-mono);font-size:12px;line-height:1.5;min-height:220px}
+.vresult .kv{color:var(--ink)}
+.vresult .kv dt{color:var(--muted)}
+.vresult{padding:16px 18px;border-radius:14px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;align-items:start}
+.vresult svg{width:24px;height:24px}
+.vresult.ok{background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass)}
+.vresult.bad{background:var(--fail-bg);color:var(--fail);border:1px solid var(--fail)}
+.vresult strong{font-size:17px;display:block}
+.vresult p{color:var(--ink);font-size:14px}
+details{font-size:13px}
+details summary{cursor:pointer;color:var(--muted);font-weight:600}
+pre{margin:10px 0 0;padding:12px;background:var(--panel-2);border-radius:10px;overflow-x:auto;font-family:var(--font-mono);font-size:12px;line-height:1.5}
+
+/* ---------- Company: home ---------- */
+.view-tag{display:none}
+.sides{display:inline-flex;flex-wrap:wrap;gap:2px;padding:4px;margin-left:auto;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
+.sides button{display:flex;align-items:center;gap:8px;border:0;background:none;border-radius:999px;padding:7px 15px;font-size:13px;font-weight:600;color:var(--muted)}
+.sides button:hover{color:var(--ink)}
+.sides button[aria-selected="true"]{background:var(--panel-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.sides .sw{width:8px;height:8px;border-radius:50%}
+.sides [data-side="company"] .sw{background:var(--ice)}
+.sides [data-side="candidate"] .sw{background:var(--lime-b)}
+.sides [data-side="public"] .sw{background:var(--silver-b)}
+.side-banner{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:7px 22px;border-bottom:1px solid var(--line);font-size:13px}
+.side-banner .journey{margin-left:0}
+.about-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;background:none;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--muted)}
+.about-btn:hover{color:var(--ink);border-color:var(--line)}
+.about-btn svg{width:14px;height:14px;transition:transform .2s}
+.side-banner.collapsed .about-btn svg{transform:rotate(180deg)}
+.side-banner.collapsed .side-desc{display:none}
+.side-banner[data-side="company"]{background:linear-gradient(90deg,rgba(134,194,244,.14),rgba(134,194,244,0) 65%)}
+.side-banner[data-side="candidate"]{background:linear-gradient(90deg,rgba(147,226,127,.14),rgba(147,226,127,0) 65%)}
+.side-banner[data-side="public"]{background:linear-gradient(90deg,rgba(174,183,194,.14),rgba(174,183,194,0) 65%)}
+.side-pill{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;color:var(--bg);white-space:nowrap}
+.side-banner[data-side="company"] .side-pill{background:var(--ice)}
+.side-banner[data-side="candidate"] .side-pill{background:var(--lime-b)}
+.side-banner[data-side="public"] .side-pill{background:var(--silver-b)}
+.side-desc{color:var(--muted);min-width:0;flex:1 1 100%;margin:0;padding:2px 0 4px}
+.h1-sm{font-size:clamp(28px,4vw,44px)}
+.home-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.home-head .eyebrow{margin-bottom:10px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.stat-tile{padding:16px 18px;display:grid;gap:2px}
+.stat-tile .v{font-family:var(--font-display);font-weight:300;font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat-tile .k{font-size:13px;color:var(--muted)}
+.atable-scroll{overflow-x:auto}
+.atable,.calib,.rub{width:100%;border-collapse:collapse;font-size:14px}
+.atable{min-width:720px}
+.atable th,.calib th,.rub th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:12px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+.atable td,.calib td,.rub td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.atable tr:last-child td,.calib tr:last-child td,.rub tr:last-child td{border-bottom:0}
+.atable .t{font-weight:600}
+.atable .num,.calib .num{font-variant-numeric:tabular-nums}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.how-item{padding:18px 20px;display:grid;gap:6px;align-content:start}
+.how-item .num{font-size:12px;color:var(--lime-a)}
+
+/* ---------- Company: visual home ---------- */
+.home-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.home-below{margin-top:72px}
+.stat .linkbtn{justify-self:start;margin-top:4px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.acard{border-radius:20px;border:1px solid var(--line);background:var(--panel);overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr)}
+.acard-body{padding:14px 16px 16px;display:grid;gap:10px;align-content:start}
+.acard .t{font-weight:700;font-size:15px}
+.acard .meta{font-size:12.5px;color:var(--muted)}
+.prog{display:grid;gap:5px}
+.prog .bar{height:6px;border-radius:999px;background:var(--panel-2);overflow:hidden}
+.prog .bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--lime-a),var(--lime-b))}
+.prog .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.acard .btn{justify-self:start;padding:8px 14px;font-size:13px}
+.acard.new{border-style:dashed;border-color:var(--line-strong);background:none;display:grid;place-items:center;align-content:center;gap:10px;min-height:200px;text-align:center;padding:20px;color:var(--muted)}
+.acard.new:hover{border-color:var(--lime-b);color:var(--ink)}
+.acard.new .plus{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(140deg,var(--lime-a),var(--lime-b));color:var(--lime-ink)}
+.acard.new .plus svg{width:22px;height:22px}
+.art{position:relative;aspect-ratio:2.05/1;max-width:100%;overflow:hidden;background:var(--panel-2)}
+.art img,.art svg{display:block;width:100%;height:100%;object-fit:cover}
+.art .st-chip{position:absolute;top:10px;left:10px}
+.art .gen-label{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-weight:400;font-size:15px;color:var(--ink);opacity:.85;text-align:center;padding:10px}
+.pin{position:absolute;transform:translate(-7px,-50%);display:flex;align-items:center;gap:6px;pointer-events:none}
+.pin.flip{flex-direction:row-reverse;transform:translate(calc(-100% + 7px),-50%)}
+.ph{width:100%;height:100%;display:grid;place-items:center;align-content:center;gap:6px;text-align:center;padding:12px;
+  background:radial-gradient(ellipse at 50% 42%,rgba(43,102,174,.34),rgba(43,102,174,0) 62%),radial-gradient(circle,var(--line-strong) 1px,transparent 1.5px) 0 0/16px 16px,var(--panel-2)}
+.ph-t{font-family:var(--font-display);font-weight:400;font-size:15px}
+.ph-s{font-size:12px;color:var(--muted)}
+.site-ph{aspect-ratio:2.05/1;max-width:100%}
+.site-ph .ph-t{font-size:20px}
+.pin .pd{width:14px;height:14px;border-radius:50%;background:var(--fail);box-shadow:0 0 0 4px rgba(255,126,110,.3);flex:none}
+.pin .pl{font-size:11px;font-weight:700;background:rgba(10,11,13,.78);color:var(--ink);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.side-card{padding:16px 18px;display:grid;gap:12px}
+.attn,.recent{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.attn li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start}
+.attn .ai{width:30px;height:30px;border-radius:10px;display:grid;place-items:center}
+.attn .ai svg{width:15px;height:15px}
+.attn .ai.fail{background:var(--fail-bg);color:var(--fail)}
+.attn .ai.warn{background:var(--warn-bg);color:var(--warn)}
+.attn .ai.ice{background:rgba(134,194,244,.14);color:var(--ice)}
+.attn .tx{font-size:13.5px;display:grid;gap:6px;justify-items:start}
+.linkbtn{border:0;background:none;padding:0;font-weight:700;font-size:13px;color:var(--lime-a)}
+.linkbtn:hover{text-decoration:underline}
+.linkbtn:disabled{color:var(--muted);text-decoration:none;cursor:default}
+.recent button{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;border:1px solid transparent;background:none;border-radius:12px;padding:6px}
+.recent button:hover{background:var(--panel-2)}
+.recent .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-display);font-size:12px;background:linear-gradient(150deg,var(--silver-a),var(--silver-b));color:var(--card-ink)}
+.recent .nm{font-weight:600;font-size:14px}
+.recent .sb{font-size:12px;color:var(--muted)}
+
+/* ---------- Company: builder ---------- */
+.build{display:grid;grid-template-columns:220px minmax(0,1fr) 290px;gap:16px;align-items:start}
+.bprog{height:4px;border-radius:999px;background:var(--panel-2);overflow:hidden;margin-top:8px;max-width:240px}
+.bprog i{display:block;height:100%;background:linear-gradient(90deg,var(--lime-a),var(--lime-b));border-radius:999px}
+.bpreview{display:grid;gap:12px;min-width:0}
+.pv{overflow:hidden;padding:0;display:grid}
+.pv .pv-top{padding:12px 16px;border-bottom:1px solid var(--line)}
+.pv-body{padding:14px 16px 16px;display:grid;gap:12px}
+.pv-title{font-family:var(--font-display);font-weight:500;font-size:16px;line-height:1.25}
+.pv-agent{display:flex;gap:10px;align-items:center}
+.pv-agent .nm{font-weight:700}
+.pv-line{font-size:13.5px;line-height:1.5;padding:10px 12px;border-radius:12px;background:var(--panel-2);font-style:italic}
+.pv-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pv-stats div{padding:10px;border-radius:12px;background:var(--panel-2);display:grid;gap:0}
+.pv-stats .v{font-family:var(--font-display);font-weight:300;font-size:22px}
+.pv-stats .k{font-size:11.5px;color:var(--muted)}
+.scard .art{border-radius:10px;margin-bottom:6px}
+.tracks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.track{border-radius:16px;border:1px solid var(--line);background:var(--panel-2);padding:14px;display:grid;gap:10px;align-content:start;min-width:0}
+.track-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.track-head h3{display:flex;gap:8px;align-items:center}
+.track-head h3::before{content:"";width:10px;height:10px;border-radius:3px}
+.track.trk-pre .track-head h3::before{background:linear-gradient(140deg,var(--coral-a),var(--coral-b))}
+.track.trk-rec .track-head h3::before{background:linear-gradient(140deg,var(--teal-a),var(--teal-b))}
+.ritem textarea{background:var(--panel-2);resize:none;min-height:0;line-height:1.4}
+.ritem .rmeta{flex-wrap:nowrap}
+.ritem .rmeta .chip.src{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto;display:block}
+.ritem .rmeta .crit-tog,.ritem .rmeta .iconbtn{flex:none}
+.site-tile .site-ph,.site-tile img{height:clamp(200px,36vh,420px);aspect-ratio:auto;width:100%;object-fit:cover}
+.ritem{display:grid;gap:8px;padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.ritem.crit{border-color:var(--fail)}
+.ritem input[type="text"]{background:var(--panel-2)}
+.rmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.crit-tog{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);cursor:pointer;color:var(--muted)}
+.crit-tog input{accent-color:var(--fail);margin:0}
+.crit-tog.on{background:var(--fail-bg);color:var(--fail);border-color:transparent}
+.rmeta .iconbtn{margin-left:auto;width:30px;height:30px}
+.track .add{border:1px dashed var(--line-strong);background:none;border-radius:12px;padding:9px;font-size:13px;font-weight:600;color:var(--muted)}
+.track .add:hover{border-color:var(--lime-b);color:var(--ink)}
+.tl{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.tl li{display:grid;grid-template-columns:22px 92px minmax(0,1fr);gap:12px;align-items:center;position:relative;padding-block:8px}
+.tl li::before{content:"";position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--line)}
+.tl li:first-child::before{top:50%}
+.tl li:last-child::before{bottom:50%}
+.tl .dt{width:22px;height:22px;border-radius:50%;position:relative;z-index:1;border:3px solid var(--panel);background:var(--ice)}
+.tl .dt.pressure{background:var(--warn)}
+.tl .dt.failure{background:var(--fail)}
+.tl .k{font-size:12px;font-weight:700;color:var(--muted)}
+.hear{display:inline-flex;align-items:center;gap:8px}
+.hear svg{width:16px;height:16px}
+.bsteps{list-style:none;margin:0;padding:0;display:grid;gap:4px;position:sticky;top:16px}
+.bsteps button{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:center;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:12px;padding:9px 10px;font-size:14px;font-weight:600;color:var(--muted)}
+.bsteps button:hover:not(:disabled){color:var(--ink)}
+.bsteps .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;border:1px solid var(--line-strong)}
+.bsteps .dot svg{width:13px;height:13px}
+.bsteps button[aria-current="step"]{background:var(--panel);border-color:var(--line-strong);color:var(--ink)}
+.bsteps button.done .dot{background:linear-gradient(140deg,var(--lime-a),var(--lime-b));color:var(--lime-ink);border-color:transparent}
+.bsteps button:disabled{opacity:.4;cursor:not-allowed}
+.bpanel{padding:26px;display:grid;gap:22px;min-width:0}
+.bhead{display:grid;gap:6px}
+.bhead p{color:var(--muted);max-width:62ch}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{display:grid;gap:7px;font-size:13px;font-weight:600;min-width:0;align-content:start}
+.field.full{grid-column:1 / -1}
+.field small{font-weight:400;color:var(--muted)}
+input[type="text"],select,textarea{font:inherit;font-size:14px;font-weight:400;color:var(--ink);background:var(--panel-2);border:1px solid var(--line-strong);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+textarea{resize:vertical;line-height:1.5}
+input[type="text"]:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-offset:1px}
+input:disabled,select:disabled,textarea:disabled,.iconbtn:disabled{opacity:.55;cursor:not-allowed}
+.drop{position:relative;display:grid;gap:4px;justify-items:center;text-align:center;padding:22px 16px;border:1.5px dashed var(--line-strong);border-radius:14px;cursor:pointer;font-weight:400}
+.drop:hover,.drop:focus-within{border-color:var(--lime-b)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.drop strong{font-weight:600}
+.thumbs,.filelist{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs img,.thumbs .vid{width:92px;height:66px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.thumbs .vid{display:grid;place-items:center;font-size:11px;color:var(--muted);background:var(--panel-2);padding:4px;text-align:center;overflow:hidden}
+.bfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:18px;border-top:1px solid var(--line)}
+.scen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.scard{display:grid;gap:6px;text-align:left;padding:16px;border-radius:14px;border:1px solid var(--line-strong);background:var(--panel-2);align-content:start}
+.scard:hover:not(:disabled){border-color:var(--muted)}
+.scard[aria-pressed="true"]{border-color:var(--lime-b);box-shadow:inset 0 0 0 1px var(--lime-b)}
+.scard:disabled{opacity:.45;cursor:not-allowed}
+.scard .t{font-weight:700;font-size:15px}
+.scard .d{font-size:13px;color:var(--muted)}
+.toggles{display:flex;gap:8px;flex-wrap:wrap}
+.tog{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;border:1px solid var(--line-strong);font-weight:600;font-size:13px;cursor:pointer}
+.tog input{accent-color:var(--lime-b);margin:0}
+.err{color:var(--fail);font-size:13px;font-weight:600}
+.gen{display:grid;gap:16px;padding-block:8px 20px}
+.gen-line{display:flex;gap:12px;align-items:center;font-size:15px;color:var(--muted)}
+.gen-line.ok{color:var(--ink)}
+.gen-line .st{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-strong);flex:none;display:grid;place-items:center}
+.gen-line.ok .st{background:linear-gradient(140deg,var(--lime-a),var(--lime-b));color:var(--lime-ink);border-color:transparent}
+.gen-line.ok .st svg{width:11px;height:11px}
+.gen-line.now .st{border-color:var(--ice);border-top-color:transparent;animation:spin .9s linear infinite}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;font-weight:600;color:var(--muted);white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--lime-b)}
+.tabpane{display:grid;gap:18px}
+.scene-prev{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);aspect-ratio:2.05/1;max-width:100%;background:radial-gradient(ellipse at 50% 45%,rgba(43,102,174,.3),rgba(10,11,13,0) 65%),var(--panel-2);display:grid;place-items:center}
+.scene-prev img{width:100%;height:100%;object-fit:cover;display:block}
+.scene-wait{display:grid;gap:8px;justify-items:center;text-align:center;padding:16px}
+.prev-tag{position:absolute;top:10px;left:10px;background:rgba(10,11,13,.7);border-color:rgba(255,255,255,.14)}
+.promptbox{font-family:var(--font-mono);font-size:12.5px;font-weight:400;background:var(--panel-2);border-radius:10px;padding:12px 14px;color:var(--muted);line-height:1.6}
+.persona{display:flex;gap:12px;align-items:center}
+.persona .nm{font-family:var(--font-display);font-weight:500;font-size:17px}
+.flow{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.flow li{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center}
+.flow .k{font-size:12px;font-weight:700;color:var(--muted)}
+.facts{margin:0;padding-left:18px;font-weight:400;font-size:14px;display:grid;gap:4px}
+.rub-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+.rub{min-width:760px}
+.rub td:first-child{width:46%}
+.rub .switch{display:block}
+.chip.src{font-weight:500;color:var(--muted)}
+.iconbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line-strong);background:none;display:grid;place-items:center;color:var(--muted)}
+.iconbtn:hover:not(:disabled){color:var(--fail);border-color:var(--fail)}
+.iconbtn svg{width:12px;height:12px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.two{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+.two .sub-card:first-child{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.two .sub-card:first-child h3,.two .sub-card:first-child p{grid-column:1}
+.two .sub-card:first-child > div{grid-column:2;grid-row:1 / span 2}
+.sub-card{padding:18px 20px;display:grid;gap:12px;align-content:start}
+.calib-wrap{overflow-x:auto}
+.calib{min-width:460px;font-size:13px}
+.calib th,.calib td{padding:10px 10px}
+.approved{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px;padding:14px 16px;border-radius:14px;background:var(--pass-bg);color:var(--pass);border:1px solid var(--pass)}
+.approved svg{width:20px;height:20px}
+.approved p{color:var(--ink);font-size:14px}
+.warnbox{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px;padding:14px 16px;border-radius:14px;background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn)}
+.warnbox svg{width:20px;height:20px}
+.warnbox p{color:var(--ink);font-size:14px}
+.linkrow{display:flex;gap:8px;flex-wrap:wrap}
+.linkrow input{flex:1 1 260px}
+.invlist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.invlist li{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:14px;font-weight:500;flex-wrap:wrap}
+.invlist .mail{overflow-wrap:anywhere}
+
+@media (max-width:1180px){
+  .build{grid-template-columns:220px minmax(0,1fr)}
+  .bpreview{grid-column:2}
+  .home-grid{grid-template-columns:minmax(0,1fr)}
+  .home-side{order:-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+}
+@media (max-width:980px){
+  .hero-top,.lobby,.stage,.dash,.lower,.build,.two,.tracks{grid-template-columns:minmax(0,1fr)}
+  .bpreview{grid-column:auto}
+  .bsteps{position:static;grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto;padding-bottom:4px}
+  .how{grid-template-columns:minmax(0,1fr)}
+  .hero-stage{grid-template-columns:minmax(0,1fr)}
+  .fan{position:static;margin-top:-40px;padding-left:12px}
+  .stream{max-height:300px}
+  .journey{margin-left:0}
+}
+@media (max-width:640px){
+  .screen{padding:20px 14px 28px}
+  .topbar{padding:12px 14px}
+  .journey button{padding:5px 9px;font-size:12px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-below{margin-top:28px}
+  .form-grid{grid-template-columns:minmax(0,1fr)}
+  .bpanel{padding:18px}
+  .flow li{grid-template-columns:minmax(0,1fr);gap:4px}
+  .tl li{grid-template-columns:22px minmax(0,1fr)}
+  .tl li input{grid-column:2}
+  .fan{flex-direction:column;gap:10px;margin-top:16px;padding-left:0}
+  .fcard{width:100%;min-height:0;transform:none!important;margin-left:0!important}
+  .scen-strip{grid-template-columns:minmax(0,1fr);margin-top:28px}
+  .sections{grid-template-columns:minmax(0,1fr)}
+  .profile{grid-template-columns:56px minmax(0,1fr)}
+  .photo{width:56px;height:56px}
+  .profile > .btn{grid-column:1 / -1}
+  .result,.cred{grid-template-columns:minmax(0,1fr)}
+  .tline{grid-template-columns:44px minmax(0,1fr)}
+  .tline .sp,.tline .tx{grid-column:2}
+  .agent-tile{grid-template-columns:84px minmax(0,1fr);padding:14px}
+  .orb-wrap{width:84px}
+  .pip{grid-column:1 / -1;width:100%;max-width:220px;justify-self:end}
+  .controls{border-radius:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="shell">
+<div class="frame">
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5 L55.4 18.5 L55.4 45.5 L32 59 L8.6 45.5 L8.6 18.5 Z" fill="none" stroke="#C9EE62" stroke-width="7" stroke-linejoin="round"/><circle cx="32" cy="32" r="10.5" fill="#C9EE62"/></svg>
+      <span><span style="font-weight:300">Industry</span><span style="font-weight:600;color:#C9EE62">Proof</span></span><small>Prototype</small>
+    </div>
+    <div class="sides" role="tablist" aria-label="Switch between demo views">
+      <button type="button" role="tab" data-side="company"><span class="sw"></span>Company</button>
+      <button type="button" role="tab" data-side="candidate"><span class="sw"></span>Candidate</button>
+      <button type="button" role="tab" data-side="public"><span class="sw"></span>Public</button>
+    </div>
+  </header>
+  <div class="side-banner" id="sideBanner">
+    <span class="side-pill" id="sidePill">Company side</span>
+    <ol class="journey" id="journey" aria-label="Screens on this side"></ol>
+    <button class="about-btn" type="button" id="aboutBtn" aria-expanded="true" aria-controls="sideDesc">
+      <span id="aboutLabel">Hide</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+    </button>
+    <p class="side-desc" id="sideDesc"></p>
+  </div>
+
+  <!-- COMPANY: ASSESSMENTS HOME -->
+  <section class="screen" id="s-home" hidden>
+    <div class="view-tag">Company view · Example Fab Co.</div>
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Example Fab Co. · Hiring team</div>
+        <h1>See how candidates handle your site</h1>
+      </div>
+      <div class="hero-side">
+        <p>Set up a site-accurate assessment in three steps. Candidates take it as a five-minute video call, and you get scored evidence with a signed record.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-lime" type="button" id="btnNew">Build an assessment</button>
+          <button class="btn" type="button" data-go="dash" id="btnHeroReview">Review results</button>
+        </div>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <div class="hero-video">
+        <img src="scene_solar.jpg" style="object-position:center 12%" alt="3D scene of a rooftop solar install, generated with World Labs Marble">
+        <div class="video-tags">
+          <span class="chip"><span class="live-dot"></span>Your site in 3D · World Labs</span>
+          <span class="chip">Sample scene</span>
+        </div>
+      </div>
+      <div class="fan" aria-label="How it works">
+        <div class="fcard c1"><span class="num">.01</span><h3>Describe your site</h3><p>Industry, role, site photos and the incident to test. Add your SOPs.</p></div>
+        <div class="fcard c2"><span class="num">.02</span><h3>Approve the rubric</h3><p>We draft the 3D scene, voice agent and rubric. Your safety lead signs off.</p></div>
+        <div class="fcard c3"><span class="num">.03</span><h3>Invite and review</h3><p>Candidates take the call. You see what they decided, with evidence.</p></div>
+      </div>
+      <div class="stat" id="homeHeroStat"></div>
+    </div>
+    <div class="home-grid home-below">
+      <div class="home-main">
+        <div class="sec-head"><h3>Your assessments</h3><span class="small muted" id="homeCount"></span></div>
+        <div class="acards" id="homeCards"></div>
+      </div>
+      <aside class="home-side">
+        <div class="cut side-card"><h3>Needs your attention</h3><ul class="attn" id="homeAttn"></ul></div>
+        <div class="cut side-card"><h3>Latest results</h3><ul class="recent" id="homeRecent"></ul></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- COMPANY: BUILDER -->
+  <section class="screen" id="s-build" hidden>
+    <div class="view-tag">Company view · Assessment builder</div>
+    <div class="build">
+      <ol class="bsteps" id="bsteps" aria-label="Builder steps"></ol>
+      <div class="cut bpanel" id="bpanel"></div>
+      <aside class="bpreview" id="bpreview" aria-label="What candidates will see"></aside>
+    </div>
+  </section>
+
+  <!-- 01 BRIEFING -->
+  <section class="screen" id="s-brief">
+    <div class="view-tag">Candidate view</div>
+    <div class="hero-top">
+      <div>
+        <div class="eyebrow">Example Fab Co. · Equipment Technician</div>
+        <h1>Show us how you work on site</h1>
+      </div>
+      <div class="hero-side">
+        <p>A five-minute video call inside a 3D replica of the site. Talk with your shift lead, handle what comes up, and get a signed record of how you did.</p>
+        <button class="btn btn-lime" type="button" data-go="lobby">Continue to check-in</button>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <div class="hero-video">
+        <img src="scene_robot.jpg" alt="3D scene of a robot arm inside a fenced cell, generated with World Labs Marble">
+        <div class="video-tags">
+          <span class="chip"><span class="live-dot"></span>3D site · World Labs</span>
+          <span class="chip">Sample scene</span>
+        </div>
+      </div>
+        <div class="fan" aria-label="What the assessment covers">
+          <div class="fcard c1"><span class="num">.01</span><h3>Safety precaution</h3><p>Explain what you'd put on and check before you start work.</p></div>
+          <div class="fcard c2"><span class="num">.02</span><h3>Failure recovery</h3><p>Something goes wrong mid-task. Tell your lead what you do.</p></div>
+          <div class="fcard c3"><span class="num">.03</span><h3>Signed record</h3><p>Your results come with a credential anyone can verify.</p></div>
+        </div>
+      <div class="stat">
+        <div class="big">~5 min</div>
+        <div class="lbl">Video call with Sam, your AI shift lead</div>
+      </div>
+    </div>
+    <div class="cut scen-strip">
+      <div>
+        <div class="eyebrow">Your scenario</div>
+        <h2 style="margin-top:6px">Chemical spill at wet bench</h2>
+        <div class="meta">
+          <span class="chip">Semiconductor cleanroom</span>
+          <span class="chip">Voice + camera</span>
+          <span class="chip warn">Fictional company, people and chemicals</span>
+        </div>
+      </div>
+      <p class="small muted" style="max-width:34ch">You're scored on what you decide and explain. Not on speed, accent or how smoothly you talk.</p>
+    </div>
+  </section>
+
+  <!-- 02 CHECK-IN -->
+  <section class="screen" id="s-lobby" hidden>
+    <div class="view-tag">Candidate view</div>
+    <div class="lobby">
+      <div class="preview" id="lobbyPreview">
+        <video id="lobbyVideo" playsinline muted hidden></video>
+        <div class="cam-off" id="lobbyOff">
+          <div class="face">JL</div>
+          <p class="cam-msg" id="lobbyMsg">Your camera is off</p>
+        </div>
+        <span class="preview-name">Jordan Lee</span>
+        <div class="round-ctrls">
+          <button class="rbtn" type="button" id="lobbyMic" aria-label="Mute microphone" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button>
+          <button class="rbtn off" type="button" id="lobbyCam" aria-label="Turn on camera" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></button>
+        </div>
+      </div>
+      <div class="cut join">
+        <div class="eyebrow">Check-in</div>
+        <h2>Ready to join?</h2>
+        <div class="waiting"><span class="mini-orb" aria-hidden="true"></span><div><div style="font-weight:600">Sam is in the call</div><div class="small muted">AI shift lead · Bay 3</div></div></div>
+        <ul class="checklist">
+          <li><span class="st ok" id="stMic"></span><span>Microphone on</span></li>
+          <li><span class="st" id="stCam"></span><span>Camera on. Your ID photo is taken when you join. Video is never scored.</span></li>
+        </ul>
+        <label class="consent" for="consent">
+          <input type="checkbox" id="consent">
+          <span>I agree that this call is recorded and transcribed, and that Example Fab Co. will see the results.</span>
+        </label>
+        <button class="btn btn-lime" id="btnJoin" type="button" disabled>Join call</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 CALL -->
+  <section class="screen" id="s-call" hidden>
+    <div class="callbar">
+      <span class="rec"><span class="live-dot"></span>REC</span>
+      <div><div class="title">Bay 3 incident call</div><div class="small muted">Chemical spill at wet bench</div></div>
+      <ol class="phases" id="phases">
+        <li data-p="0">Precautions</li>
+        <li data-p="1">Pressure</li>
+        <li data-p="2">Spill</li>
+        <li data-p="3">Wrap-up</li>
+      </ol>
+      <span class="clock mono" id="callClock">00:00</span>
+    </div>
+    <div class="stage">
+      <div class="main-col">
+      <div class="site-tile">
+        <div class="site-ph"><div class="ph"><span class="mini-orb" aria-hidden="true"></span><span class="ph-t">Bay 3 · Cleanroom</span><span class="ph-s">World Labs scene goes here</span></div></div>
+        <div class="site-top">
+          <span class="chip">Site view · World Labs</span>
+          <span class="chip" id="areaStatus">Area: Normal</span>
+        </div>
+        <p class="site-note">Shubham's World Labs cleanroom render drops in here.</p>
+      </div>
+      <div class="agent-tile" id="agentTile">
+        <div class="orb-zone">
+          <div class="orb-wrap">
+            <svg viewBox="0 0 200 200" aria-hidden="true">
+              <circle cx="100" cy="100" r="97" fill="none" stroke="var(--line-strong)" stroke-width=".8"/>
+              <g class="ring-a"><circle cx="100" cy="100" r="90" fill="none" stroke="var(--ice)" stroke-opacity=".45" stroke-width="1" stroke-dasharray="2 6"/><path d="M100 3 A97 97 0 0 1 172 35" fill="none" stroke="var(--lime-b)" stroke-width="2.2" stroke-linecap="round"/></g>
+              <g class="ring-b"><circle cx="100" cy="100" r="80" fill="none" stroke="var(--ice)" stroke-opacity=".25" stroke-width="1"/><path d="M20 100 A80 80 0 0 1 44 43" fill="none" stroke="var(--ice)" stroke-width="2" stroke-linecap="round"/></g>
+            </svg>
+            <div class="orb" id="orb"></div>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="agent-head">
+            <span class="nm">Sam</span><span class="rl">Shift lead · AI agent</span>
+            <span class="speak-tag"><i></i><i></i><i></i>Speaking</span>
+          </div>
+          <div class="caption" id="caption" aria-live="polite">
+            <span class="who" id="capWho">Connecting</span>
+            <p id="capText">Joining the call…</p>
+          </div>
+        </div>
+        <div class="pip" id="pip">
+          <video id="pipVideo" playsinline muted hidden></video>
+          <div class="cam-off" id="pipOff"><div class="face">JL</div></div>
+          <span class="pip-name">You</span>
+        </div>
+      </div>
+      </div>
+      <div class="tpanel">
+        <div class="tpanel-head"><h3>Transcript</h3><span class="small muted">Live</span></div>
+        <div class="stream" id="stream"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="rbtn" type="button" id="callMic" aria-label="Mute microphone" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button>
+      <button class="rbtn off" type="button" id="callCam" aria-label="Turn on camera" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></button>
+      <button class="rbtn on" type="button" id="callCC" aria-label="Hide captions" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 10.5a2 2 0 100 3M16 10.5a2 2 0 100 3"/></svg></button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="btn demo-skip" type="button" id="btnSkip">Skip to end (demo)</button>
+      <button class="btn btn-red" type="button" id="btnEnd">End call &amp; submit</button>
+    </div>
+  </section>
+
+  <!-- 04 SUBMITTED -->
+  <section class="screen" id="s-done" hidden>
+    <div class="view-tag">Candidate view</div>
+    <div class="done-wrap">
+      <div class="cut done">
+        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h2>Assessment submitted</h2>
+        <p class="muted">Thanks, Jordan. Your call went to Example Fab Co.'s hiring team, and they'll contact you directly. A signed record of this assessment was issued to you.</p>
+        <dl class="kv">
+          <dt>Scenario</dt><dd>Chemical spill at wet bench</dd>
+          <dt>Call length</dt><dd class="mono">01:14</dd>
+          <dt>Credential</dt><dd class="mono" id="doneCred"></dd>
+        </dl>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-lime" data-go="verify" type="button">Verify my credential</button>
+          <button class="btn" data-go="dash" type="button">Demo: switch to the company's view</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 EMPLOYER REVIEW -->
+  <section class="screen" id="s-dash" hidden>
+    <div class="view-tag">Employer view · Example Fab Co.</div>
+    <div class="dash">
+      <nav class="cut rail" aria-label="Candidates">
+        <div class="rail-head"><div class="eyebrow">Candidates</div><div class="small muted">Chemical spill at wet bench</div></div>
+        <div id="candList"></div>
+      </nav>
+      <div class="report" id="report"></div>
+    </div>
+  </section>
+
+  <!-- 06 VERIFY -->
+  <section class="screen" id="s-verify" hidden>
+    <div class="verify">
+      <div class="cut vcard">
+        <div class="seal">
+          <span class="mini-orb" aria-hidden="true"></span>
+          <div><h2>Verify a credential</h2><p class="muted small">Check that an IndustryProof result is real and hasn't been changed since it was issued. No account needed.</p></div>
+        </div>
+        <div class="field">
+          <span>Credential ID</span>
+          <div class="linkrow"><input type="text" id="vId" placeholder="cred_93739723290c" aria-label="Credential ID" autocomplete="off" spellcheck="false"><button class="btn btn-lime" type="button" id="btnLookup">Look up</button></div>
+          <small>Try a sample: <button class="linkbtn" type="button" data-sample="jordan">Jordan Lee</button> · <button class="linkbtn" type="button" data-sample="riley">Riley Chen</button></small>
+        </div>
+        <div id="vResult" aria-live="polite"></div>
+        <details id="vRaw">
+          <summary>Signed record (for technical checks and the tamper test)</summary>
+          <div class="field" style="margin-top:12px">
+            <textarea id="vJson" rows="14" class="mono vjson" spellcheck="false" aria-label="Signed credential record"></textarea>
+            <small>Change anything, such as the score, then verify again. The signature only matches the original.</small>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+            <button class="btn btn-lime" type="button" id="btnVerify">Verify this record</button>
+            <button class="btn" type="button" id="btnReset">Reset to original</button>
+          </div>
+          <p class="vinline" id="vInline" aria-live="polite"></p>
+        </details>
+        <p class="small muted">Signatures are checked against IndustryProof's published key <span class="mono">9a9b6e3d094b1e54</span>. A valid credential certifies this assessment, not a person's overall competence.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Mock data: same shape as the grading output ---------- */
+const RUBRIC = [
+  {id:"p1", section:"Precaution", label:"Full cleanroom gown before entering"},
+  {id:"p2", section:"Precaution", label:"Adds chemical PPE for the wet bench"},
+  {id:"p3", section:"Precaution", label:"Checks which chemical is in use"},
+  {id:"p4", section:"Precaution", label:"Refuses the “just gloves” shortcut"},
+  {id:"r1", section:"Recovery", label:"Stops and warns people nearby"},
+  {id:"r2", section:"Recovery", label:"Doesn't clean an unknown chemical alone"},
+  {id:"r3", section:"Recovery", label:"Knows where the eyewash or safety shower is"},
+  {id:"r4", section:"Recovery", label:"Reports to the shift lead or safety team"}
+];
+const RUBRIC_META = { version:"v1", approvedBy:"Dana Ruiz, EHS Lead", approvedOn:"Oct 8, 2026" };
+const CANDIDATES = {
+  jordan: {
+    candidate:{name:"Jordan Lee", initials:"JL", role:"Equipment Technician", assessed_at:"2026-10-09T15:15:00Z"},
+    scenario:{id:"cleanroom-spill-01", title:"Chemical spill at wet bench", duration_sec:74},
+    result:{status:"pass", score:7, max_score:8, auto_fail:false, auto_fail_reason:null},
+    items:{
+      p1:{passed:true, evidence:"I'd gown up fully in the gowning room.", t:6},
+      p2:{passed:true, evidence:"I'd add chemical gloves over my cleanroom gloves, a face shield and an apron.", t:19},
+      p3:{passed:true, evidence:"Then I'll check the SDS for it before I start.", t:33},
+      p4:{passed:true, evidence:"No, I'm not going near an acid bench without the full PPE.", t:40.4},
+      r1:{passed:true, evidence:"I'll tell the tech next to me to stay clear of the area.", t:55.1},
+      r2:{passed:true, evidence:"I won't try to clean it, I don't know what it is.", t:65},
+      r3:{passed:false, evidence:"Not mentioned during the call.", t:null},
+      r4:{passed:true, evidence:"I'm calling you and the safety team.", t:65}
+    },
+    timing:{
+      pressure:{value:2.4, label:"Pressure line to refusal", detail:"Refused the shortcut, then held firm when pushed again."},
+      spill:{value:3.1, label:"Spill line to first safety action", detail:"Stopped and warned the nearby technician."},
+      context:{rate:"148 words/min", avgPause:"0.6 s", longestPause:"1.9 s"}
+    },
+    transcript:[
+      {speaker:"agent", t:0, text:"Hey, I need you to check the wet bench in bay 3. What do you put on before you go in?"},
+      {speaker:"candidate", t:6, text:"Before I go in I'd gown up fully in the gowning room. Hood, coverall, boots, then gloves and safety glasses."},
+      {speaker:"agent", t:16, text:"Anything else?"},
+      {speaker:"candidate", t:19, text:"It's a wet bench, so I'd add chemical gloves over my cleanroom gloves, a face shield and an apron. What's in the tank right now?"},
+      {speaker:"agent", t:29, text:"Label says it's an acid mixture for etching."},
+      {speaker:"candidate", t:33, text:"Okay. Then I'll check the SDS for it before I start."},
+      {speaker:"agent", t:38, text:"Gowning takes forever. Just throw on gloves, it's a two-minute job."},
+      {speaker:"candidate", t:40.4, text:"No, I'm not going near an acid bench without the full PPE. It'll take me five minutes."},
+      {speaker:"agent", t:46, text:"Seriously, nobody checks. We're behind."},
+      {speaker:"candidate", t:48, text:"I get it, but I'm still gowning up."},
+      {speaker:"agent", t:52, text:"Okay, you're at the bench. There's liquid on the floor in front of it. What do you do?"},
+      {speaker:"candidate", t:55.1, text:"I'm stopping and stepping back. I'll tell the tech next to me to stay clear of the area."},
+      {speaker:"agent", t:63, text:"And then what?"},
+      {speaker:"candidate", t:65, text:"I'm calling you and the safety team. I won't try to clean it, I don't know what it is."},
+      {speaker:"agent", t:72, text:"Okay, got it. Thanks, that's all for now."}
+    ]
+  },
+  riley: {
+    candidate:{name:"Riley Chen", initials:"RC", role:"Equipment Technician", assessed_at:"2026-10-09T14:40:00Z"},
+    scenario:{id:"cleanroom-spill-01", title:"Chemical spill at wet bench", duration_sec:61},
+    result:{status:"fail", score:1, max_score:8, auto_fail:true, auto_fail_reason:"Agreed to work at the acid bench in gloves only, then started cleaning the spill without chemical PPE."},
+    items:{
+      p1:{passed:false, evidence:"I'd put on the bunny suit and gloves, and a mask I guess.", t:7},
+      p2:{passed:false, evidence:"Not mentioned during the call.", t:null},
+      p3:{passed:false, evidence:"Not mentioned during the call.", t:null},
+      p4:{passed:false, evidence:"Yeah, okay. If it's quick I'll just do gloves.", t:30.8, critical:true},
+      r1:{passed:false, evidence:"Not mentioned during the call.", t:null},
+      r2:{passed:false, evidence:"I'd grab some wipes and clean it up so nobody slips.", t:42.5, critical:true},
+      r3:{passed:false, evidence:"Not mentioned during the call.", t:null},
+      r4:{passed:true, evidence:"…then let you know.", t:42.5}
+    },
+    timing:{
+      pressure:{value:null, label:"Pressure line to refusal", detail:"Agreed to the shortcut 6.8 s after it was suggested."},
+      spill:{value:null, label:"Spill line to first safety action", detail:"No safety action. Started cleaning instead."},
+      context:{rate:"121 words/min", avgPause:"1.4 s", longestPause:"5.2 s"}
+    },
+    transcript:[
+      {speaker:"agent", t:0, text:"Hey, I need you to check the wet bench in bay 3. What do you put on before you go in?"},
+      {speaker:"candidate", t:7, text:"Um, I'd put on the bunny suit and gloves, and a mask I guess."},
+      {speaker:"agent", t:14, text:"Anything else?"},
+      {speaker:"candidate", t:19, text:"Safety glasses."},
+      {speaker:"agent", t:24, text:"Gowning takes forever. Just throw on gloves, it's a two-minute job."},
+      {speaker:"candidate", t:30.8, text:"Yeah, okay. If it's quick I'll just do gloves."},
+      {speaker:"agent", t:35, text:"Great. Okay, you're at the bench. There's liquid on the floor in front of it. What do you do?"},
+      {speaker:"candidate", t:42.5, text:"I'd grab some wipes and clean it up so nobody slips, then let you know."},
+      {speaker:"agent", t:50, text:"And then what?"},
+      {speaker:"candidate", t:54, text:"Then I'd finish checking the bench."},
+      {speaker:"agent", t:60, text:"Okay, got it. Thanks, that's all for now."}
+    ]
+  }
+};
+
+/* ---------- Helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const mmss = t => { const s = Math.max(0, Math.floor(t)); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); };
+const fmtDate = iso => new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+const ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const ICON_NO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const ICON_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>';
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let current = "jordan";
+
+/* ---------- Navigation ---------- */
+const SCREENS = ["home","build","brief","lobby","call","done","dash","verify"];
+const SIDE_OF = {home:"company", build:"company", dash:"company", brief:"candidate", lobby:"candidate", call:"candidate", done:"candidate", verify:"public"};
+const SIDES = {
+  company:{pill:"Company side", desc:"Example Fab Co.’s hiring team: builds assessments, approves the rubric and reviews results. This is who pays.",
+    nav:[["home","1 · Overview"],["build","2 · Build an assessment"],["dash","3 · Review results"]]},
+  candidate:{pill:"Candidate side", desc:"Jordan Lee, a job applicant: gets a link from the company and takes the assessment by video call.",
+    nav:[["brief","1 · Briefing"],["lobby","2 · Check-in"],["call","3 · Video call"],["done","4 · Submitted"]]},
+  public:{pill:"Public", desc:"Anyone with the credential link, such as another employer, can check that the result is real and unchanged.",
+    nav:[["verify","Verify a credential"]]}
+};
+const lastOnSide = {company:"home", candidate:"brief", public:"verify"};
+let shownSide = null, bannerOpen = true;
+function setBanner(open){
+  bannerOpen = open;
+  $("#sideBanner").classList.toggle("collapsed", !open);
+  $("#aboutBtn").setAttribute("aria-expanded", String(open));
+  $("#aboutLabel").textContent = open ? "Hide" : "About this view";
+}
+$("#aboutBtn").addEventListener("click", () => setBanner(!bannerOpen));
+function renderSide(name){
+  const side = SIDE_OF[name], s = SIDES[side];
+  lastOnSide[side] = name;
+  setBanner(side !== shownSide);
+  shownSide = side;
+  const banner = $("#sideBanner"); banner.dataset.side = side;
+  $("#sidePill").textContent = s.pill; $("#sideDesc").textContent = s.desc;
+  $("#journey").innerHTML = s.nav.map(([id,l]) => '<li><button type="button" data-go="'+id+'"'+(id===name?' aria-current="step"':'')+'><span class="label">'+esc(l)+'</span></button></li>').join("");
+  $$(".sides [data-side]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.side === side)));
+}
+$$(".sides [data-side]").forEach(b => b.addEventListener("click", () => go(lastOnSide[b.dataset.side])));
+function go(name){
+  SCREENS.forEach(s => { $("#s-"+s).hidden = (s !== name); });
+  renderSide(name);
+  if (name === "home") renderHome();
+  if (name === "build") renderBuild();
+  if (name === "call") enterCall();
+  if (name === "dash") renderDashboard();
+  if (name === "verify") renderVerify();
+  window.scrollTo({top:0});
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-go]"); if (b) go(b.dataset.go); });
+
+/* ---------- Camera (real in the live app; falls back to a placeholder where camera access isn't allowed) ---------- */
+const cam = { stream:null, state:"off", photo:null };
+function setCamButtons(){
+  const on = cam.state !== "off";
+  ["#lobbyCam","#callCam"].forEach(id => {
+    const b = $(id); b.classList.toggle("off", !on);
+    b.setAttribute("aria-pressed", String(on));
+    b.setAttribute("aria-label", on ? "Turn off camera" : "Turn on camera");
+  });
+  $("#stCam").classList.toggle("ok", on);
+  const live = cam.state === "live";
+  [["#lobbyVideo","#lobbyOff"],["#pipVideo","#pipOff"]].forEach(([v,o]) => {
+    const video = $(v); video.hidden = !live; $(o).hidden = live;
+    if (live && video.srcObject !== cam.stream){ video.srcObject = cam.stream; video.play().catch(()=>{}); }
+  });
+  $("#lobbyMsg").textContent =
+    cam.state === "sim" ? "Camera preview isn't available in this preview page. It works in the live app."
+    : cam.state === "off" ? "Your camera is off" : "";
+}
+async function camOn(){
+  try{
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("unsupported");
+    const s = await Promise.race([
+      navigator.mediaDevices.getUserMedia({video:{width:640,height:480}, audio:false}),
+      new Promise((_,rej) => setTimeout(() => rej(new Error("timeout")), 6000))
+    ]);
+    cam.stream = s; cam.state = "live";
+  }catch(err){ cam.state = "sim"; }
+  setCamButtons();
+}
+function camOff(){
+  if (cam.stream){ cam.stream.getTracks().forEach(t => t.stop()); cam.stream = null; }
+  cam.state = "off"; setCamButtons();
+}
+function takeIdPhoto(){
+  if (cam.state !== "live") return;
+  const v = $("#lobbyVideo"); if (!v.videoWidth) return;
+  const c = document.createElement("canvas"); c.width = 240; c.height = 240;
+  const side = Math.min(v.videoWidth, v.videoHeight);
+  c.getContext("2d").drawImage(v, (v.videoWidth-side)/2, (v.videoHeight-side)/2, side, side, 0, 0, 240, 240);
+  try{ cam.photo = c.toDataURL("image/jpeg", .85); }catch(e){ cam.photo = null; }
+}
+const toggleCam = () => (cam.state === "off" ? camOn() : camOff());
+$("#lobbyCam").addEventListener("click", toggleCam);
+$("#callCam").addEventListener("click", toggleCam);
+let micOn = true;
+function toggleMic(){
+  micOn = !micOn;
+  ["#lobbyMic","#callMic"].forEach(id => { const b = $(id); b.classList.toggle("off", !micOn); b.setAttribute("aria-pressed", String(!micOn)); b.setAttribute("aria-label", micOn ? "Mute microphone" : "Unmute microphone"); });
+  $("#stMic").classList.toggle("ok", micOn);
+}
+$("#lobbyMic").addEventListener("click", toggleMic);
+$("#callMic").addEventListener("click", toggleMic);
+
+/* ---------- Check-in ---------- */
+const consent = $("#consent"), btnJoin = $("#btnJoin");
+consent.addEventListener("change", () => { btnJoin.disabled = !consent.checked; });
+btnJoin.addEventListener("click", () => { takeIdPhoto(); go("call"); });
+
+/* ---------- Call (scripted sample call; ElevenLabs agent replaces this) ---------- */
+const SPEED = 3;
+const script = CANDIDATES.jordan.transcript;
+const END_T = script[script.length-1].t + 2.5;
+const stream = $("#stream"), clock = $("#callClock"), orb = $("#orb"), tile = $("#agentTile"), pip = $("#pip");
+let simT = 0, shown = 0, running = false, finished = false, startedAt = 0, raf = 0, joinTimer = 0;
+
+function phaseOf(t){ return t < 38 ? 0 : t < 52 ? 1 : t < 72 ? 2 : 3; }
+function renderPhase(t){
+  const p = phaseOf(t);
+  $$("#phases li").forEach(li => { const n = +li.dataset.p; li.classList.toggle("on", n === p && !finished); li.classList.toggle("done", n < p || finished); });
+  const st = $("#areaStatus");
+  if (t >= 65){ st.className = "chip pass"; st.textContent = "Area: Spill reported"; }
+  else if (t >= 52){ st.className = "chip fail"; st.textContent = "Area: Spill detected"; }
+  else { st.className = "chip"; st.textContent = "Area: Normal"; }
+}
+function addMsg(line){
+  const d = document.createElement("div");
+  d.className = "msg " + (line.speaker === "agent" ? "agent" : "cand");
+  d.innerHTML = '<div class="who"><span>'+(line.speaker === "agent" ? "Sam" : "You")+'</span><span class="mono">'+mmss(line.t)+'</span></div><div class="bubble">'+esc(line.text)+'</div>';
+  stream.appendChild(d); stream.scrollTop = stream.scrollHeight;
+}
+function setCaption(who, text, cls){
+  const w = $("#capWho"); w.textContent = who; w.className = "who" + (cls ? " " + cls : "");
+  $("#capText").textContent = text;
+}
+function setSpeaker(line, active){
+  const agent = active && line && line.speaker === "agent";
+  const cand = active && line && line.speaker === "candidate";
+  tile.classList.toggle("speaking", !!agent);
+  pip.classList.toggle("talking", !!cand);
+  const amp = agent && !reduceMotion ? (0.35 + 0.65 * Math.abs(Math.sin(performance.now()/120) * Math.sin(performance.now()/310))) : 0;
+  orb.style.setProperty("--amp", amp.toFixed(3));
+}
+function tick(now){
+  simT = Math.min(END_T, ((now - startedAt)/1000) * SPEED);
+  while (shown < script.length && script[shown].t <= simT){
+    const l = script[shown]; addMsg(l);
+    setCaption(l.speaker === "agent" ? "Sam" : "You", l.text, l.speaker === "agent" ? "" : "cand");
+    shown++;
+  }
+  const last = script[shown-1], next = script[shown];
+  const lineEnd = last ? (next ? next.t : last.t + 2) : 0;
+  const active = last && simT < lineEnd - 0.6;
+  setSpeaker(last, active);
+  clock.textContent = mmss(simT); renderPhase(simT);
+  if (simT >= END_T){ finishCall(); return; }
+  raf = requestAnimationFrame(tick);
+}
+function resetCall(){
+  cancelAnimationFrame(raf); clearTimeout(joinTimer);
+  running = false; finished = false; shown = 0; simT = 0; stream.innerHTML = "";
+  clock.textContent = "00:00"; renderPhase(0); setSpeaker(null, false);
+  setCaption("Connecting", "Joining the call…");
+  const end = $("#btnEnd"); end.className = "btn btn-red"; end.textContent = "End call & submit";
+  $("#btnSkip").hidden = false;
+}
+function enterCall(){
+  setCamButtons();
+  if (running) return;
+  resetCall();
+  joinTimer = setTimeout(() => { running = true; startedAt = performance.now(); raf = requestAnimationFrame(tick); }, 1200);
+}
+function finishCall(){
+  cancelAnimationFrame(raf); clearTimeout(joinTimer);
+  while (shown < script.length){ addMsg(script[shown]); shown++; }
+  running = false; finished = true; simT = END_T;
+  clock.textContent = mmss(CANDIDATES.jordan.scenario.duration_sec);
+  renderPhase(END_T); setSpeaker(null, false);
+  setCaption("Call ended", "Sam left the call. Submit when you're ready.");
+  const end = $("#btnEnd"); end.className = "btn btn-lime"; end.textContent = "Submit assessment";
+  $("#btnSkip").hidden = true;
+}
+$("#btnSkip").addEventListener("click", finishCall);
+$("#btnEnd").addEventListener("click", () => { if (!finished) finishCall(); current = "jordan"; go("done"); });
+$("#callCC").addEventListener("click", () => {
+  const b = $("#callCC"), on = b.getAttribute("aria-pressed") !== "true";
+  b.setAttribute("aria-pressed", String(on)); b.classList.toggle("on", on);
+  b.setAttribute("aria-label", on ? "Hide captions" : "Show captions");
+  $("#caption").hidden = !on;
+});
+
+/* ---------- Credentials: issued and signed by IndustryProof's server; the page holds only the public key ---------- */
+const ISSUER_KEY = {kty:"EC", crv:"P-256", x:"siDxqq3CkkuX7jCoP407VMvLW-ES5Fx8e3CPiH2nGm0", y:"tu6t-AVRZdAUJ4RydNzRWnJSNYP5YImA8F0LX2qYGe8"};
+const ISSUER_FP = "9a9b6e3d094b1e54";
+const CREDENTIALS = {"jordan":{"id":"cred_93739723290c","record":{"issuer":"IndustryProof","assessment":"Chemical spill at wet bench","scenario_id":"cleanroom-spill-01","company":"Example Fab Co.","rubric_version":"v1","rubric_approved_by":"Dana Ruiz, EHS Lead","candidate":"Jordan Lee","role":"Equipment Technician","assessed_at":"2026-10-09T15:15:00Z","status":"pass","score":7,"max_score":8,"auto_fail":false,"items":{"p1":true,"p2":true,"p3":true,"p4":true,"r1":true,"r2":true,"r3":false,"r4":true}},"signature":"B-CckIWKB-swVQB_sjHutSXsVeaSd7AUzPQUN7OC38DnbG7kOtn_I-kuU7DmPXU7uDh5i7p7UT9zy5jS6DNyaA","key":"industryproof-demo-2026"},"riley":{"id":"cred_1760d06a0dbe","record":{"issuer":"IndustryProof","assessment":"Chemical spill at wet bench","scenario_id":"cleanroom-spill-01","company":"Example Fab Co.","rubric_version":"v1","rubric_approved_by":"Dana Ruiz, EHS Lead","candidate":"Riley Chen","role":"Equipment Technician","assessed_at":"2026-10-09T14:40:00Z","status":"fail","score":1,"max_score":8,"auto_fail":true,"items":{"p1":false,"p2":false,"p3":false,"p4":false,"r1":false,"r2":false,"r3":false,"r4":true}},"signature":"yecZrYrTu8CQ4bcu7WlC8CuuULnvTrruxeJmcMY-W-aDAYBKghQ_Kuass5E0phfsGv0NpExew7ZHc7NPaBezZQ","key":"industryproof-demo-2026"}};
+const credId = id => (CREDENTIALS[id] || {}).id || "";
+const enc = new TextEncoder();
+let issuerKeyP = null;
+function issuerKey(){
+  if (!issuerKeyP) issuerKeyP = (window.crypto && crypto.subtle)
+    ? crypto.subtle.importKey("jwk", ISSUER_KEY, {name:"ECDSA", namedCurve:"P-256"}, false, ["verify"])
+    : Promise.reject(new Error("unsupported"));
+  return issuerKeyP;
+}
+function b64urlToBytes(s){
+  const b = atob(String(s).replace(/-/g,"+").replace(/_/g,"/") + "===".slice((String(s).length + 3) % 4));
+  return Uint8Array.from(b, ch => ch.charCodeAt(0));
+}
+async function checkCredential(text){
+  let c;
+  try{ c = JSON.parse(text); }catch(e){ return {state:"broken", msg:"This isn\u2019t a complete credential record. Check that you copied all of it, including the first and last braces."}; }
+  if (!c || typeof c !== "object" || !c.record || !c.signature) return {state:"broken", msg:"This record is missing its signature or contents, so it can\u2019t be checked."};
+  let key;
+  try{ key = await issuerKey(); }catch(e){ return {state:"broken", msg:"This browser can\u2019t run the signature check. Try a current version of Chrome, Safari, Firefox or Edge."}; }
+  let ok = false;
+  try{ ok = await crypto.subtle.verify({name:"ECDSA", hash:"SHA-256"}, key, b64urlToBytes(c.signature), enc.encode(JSON.stringify(c.record))); }catch(e){ ok = false; }
+  return {state: ok ? "valid" : "changed", cred:c};
+}
+/* ---------- Employer review ---------- */
+function renderCandList(){
+  $("#candList").innerHTML = Object.entries(CANDIDATES).map(([id,c]) =>
+    '<button class="cand-btn" type="button" data-cand="'+id+'" aria-pressed="'+(id===current)+'">'+
+      '<span class="nm">'+esc(c.candidate.name)+'</span>'+
+      '<span class="chip '+(c.result.status==="pass"?"pass":"fail")+'">'+c.result.score+'/'+c.result.max_score+'</span>'+
+      '<span class="rl">'+(c.result.status==="pass"?"Pass":"Fail")+' · '+esc(new Date(c.candidate.assessed_at).toLocaleDateString("en-US",{month:"short",day:"numeric"}))+'</span>'+
+    '</button>').join("");
+  $$("#candList .cand-btn").forEach(b => b.addEventListener("click", () => { current = b.dataset.cand; renderDashboard(); }));
+}
+function itemHTML(r, it){
+  const t = it.t != null ? '<button class="tbtn" type="button" data-t="'+it.t+'">'+mmss(it.t)+'</button>' : '';
+  const ev = it.t != null ? '<q>'+esc(it.evidence)+'</q>' : '<span>'+esc(it.evidence)+'</span>';
+  const crit = it.critical ? '<span class="chip fail">Critical</span>' : '';
+  return '<li class="item '+(it.passed?"p":"f")+'"><span class="ic">'+(it.passed?ICON_OK:ICON_NO)+'</span><div><div class="lbl">'+esc(r.label)+'</div><div class="ev">'+t+ev+crit+'</div></div></li>';
+}
+function renderDashboard(){
+  renderCandList();
+  const c = CANDIDATES[current], pass = c.result.status === "pass";
+  const bySection = s => RUBRIC.filter(r => r.section === s);
+  const secScore = s => bySection(s).filter(r => c.items[r.id].passed).length;
+  const scoredT = {};
+  RUBRIC.forEach(r => { const it = c.items[r.id]; if (it.t != null) (scoredT[it.t] = scoredT[it.t] || []).push(r.label); });
+  const segs = RUBRIC.map(r => '<i class="'+(c.items[r.id].passed?"p":"f")+'"></i>').join("");
+  const metric = m => '<div class="metric"><div class="v '+(m.value==null?"bad":"")+'">'+(m.value==null?"None":m.value.toFixed(1)+" s")+'</div><div class="k">'+esc(m.label)+'</div><div class="small">'+esc(m.detail)+'</div></div>';
+  const photo = (current === "jordan" && cam.photo) ? '<img src="'+cam.photo+'" alt="">' : esc(c.candidate.initials);
+
+  $("#report").innerHTML =
+    '<div class="cut profile">'+
+      '<div class="photo" aria-hidden="true">'+photo+'<span class="idok">'+ICON_OK+'</span></div>'+
+      '<div><h2>'+esc(c.candidate.name)+'</h2><div class="sub"><span>'+esc(c.candidate.role)+'</span><span>'+esc(c.scenario.title)+'</span><span>'+esc(fmtDate(c.candidate.assessed_at))+'</span><span class="mono">'+mmss(c.scenario.duration_sec)+' call</span><span>ID photo matched</span><span>Rubric '+RUBRIC_META.version+' · approved by '+esc(RUBRIC_META.approvedBy)+'</span></div></div>'+
+      '<button class="btn" type="button" data-go="verify">Signed credential</button>'+
+    '</div>'+
+    '<div class="cut result">'+
+      '<div class="verdict '+(pass?"pass":"fail")+'">'+(pass?"Pass":"Fail")+'</div>'+
+      '<div class="scorebar"><div class="scoreline"><strong>'+c.result.score+' of '+c.result.max_score+' safety steps</strong><span class="muted">Precaution '+secScore("Precaution")+'/4 · Recovery '+secScore("Recovery")+'/4</span></div><div class="segs" aria-hidden="true">'+segs+'</div></div>'+
+    '</div>'+
+    (c.result.auto_fail ? '<div class="autofail" role="alert">'+ICON_WARN+'<div><strong>Automatic fail</strong><p>'+esc(c.result.auto_fail_reason)+'</p></div></div>' : '')+
+    '<div class="sections">'+
+      ["Precaution","Recovery"].map(s =>
+        '<div class="cut section"><div class="section-head"><h3>'+(s==="Precaution"?"Safety precaution":"Failure recovery")+'</h3><span class="mono muted">'+secScore(s)+'/4</span></div><ul class="items">'+
+        bySection(s).map(r => itemHTML(r, c.items[r.id])).join("")+'</ul></div>').join("")+
+    '</div>'+
+    '<div class="lower">'+
+      '<div class="cut timing"><h3>Response timing</h3>'+metric(c.timing.pressure)+metric(c.timing.spill)+
+        '<div class="context"><div class="eyebrow">Speech context</div>'+
+          '<div class="row"><span class="muted">Speaking rate</span><span class="mono">'+esc(c.timing.context.rate)+'</span></div>'+
+          '<div class="row"><span class="muted">Average pause before answering</span><span class="mono">'+esc(c.timing.context.avgPause)+'</span></div>'+
+          '<div class="row"><span class="muted">Longest pause</span><span class="mono">'+esc(c.timing.context.longestPause)+'</span></div>'+
+          '<p class="note">Context only. Speech rate and pauses vary with accent, language and nerves, so they never affect the score. Video is used only for the identity check.</p>'+
+        '</div></div>'+
+      '<div class="cut transcript"><div class="section-head"><h3>Transcript</h3><span class="small muted">Highlighted lines were used as evidence</span></div><ol class="tlines" id="tlines">'+
+        c.transcript.map(l => {
+          const tags = scoredT[l.t] && l.speaker === "candidate" ? scoredT[l.t] : null;
+          return '<li class="tline'+(tags?" scored":"")+'" data-t="'+l.t+'"><span class="t mono">'+mmss(l.t)+'</span><span class="sp">'+(l.speaker==="agent"?"Sam":"Candidate")+'</span><span class="tx">'+esc(l.text)+(tags?'<span class="tag">'+tags.map(esc).join(" · ")+'</span>':'')+'</span></li>';
+        }).join("")+
+      '</ol></div>'+
+    '</div>'+
+    '<div class="cut cred"><div><div class="eyebrow">Credential</div><div class="mono" style="overflow-wrap:anywhere;margin-top:4px">'+esc(credId(current))+'</div><div class="small muted">Signed by IndustryProof. Anyone with the ID can check it. Certifies this assessment, not overall competence.</div></div><button class="btn btn-lime" type="button" data-go="verify">Verify</button></div>';
+
+  $$("#report .tbtn").forEach(b => b.addEventListener("click", () => {
+    const line = $('#tlines .tline[data-t="'+b.dataset.t+'"]'); if (!line) return;
+    line.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"center"});
+    line.classList.add("flash"); setTimeout(() => line.classList.remove("flash"), 1400);
+  }));
+}
+
+/* ---------- Verify (public) ---------- */
+let vLoaded = null;
+function loadCredential(id){
+  vLoaded = id;
+  $("#vId").value = credId(id);
+  $("#vJson").value = JSON.stringify(CREDENTIALS[id], null, 2);
+}
+function resultFields(r){
+  const date = (() => { const d = new Date(r.assessed_at); return isNaN(d) ? String(r.assessed_at || "") : fmtDate(r.assessed_at); })();
+  return '<dl class="kv" style="margin-top:12px">'+
+    '<dt>Candidate</dt><dd>'+esc(r.candidate || "")+'</dd>'+
+    '<dt>Assessment</dt><dd>'+esc(r.assessment || "")+' · '+esc(r.company || "")+'</dd>'+
+    '<dt>Result</dt><dd>'+(r.status === "pass" ? "Pass" : "Fail")+', '+esc(r.score)+' of '+esc(r.max_score)+' safety steps'+(r.auto_fail ? ' · automatic fail' : '')+'</dd>'+
+    '<dt>Rubric</dt><dd>'+esc(r.rubric_version || "")+', approved by '+esc(r.rubric_approved_by || "")+'</dd>'+
+    '<dt>Issued</dt><dd>'+esc(date)+'</dd>'+
+  '</dl>';
+}
+async function runCheck(text, fromEditor){
+  const out = $("#vResult"), inline = $("#vInline"), btn = $("#btnVerify");
+  out.innerHTML = '<p class="small muted">Checking the signature\u2026</p>';
+  inline.className = "vinline"; inline.textContent = fromEditor ? "Checking\u2026" : "";
+  btn.disabled = true;
+  const res = await checkCredential(text);
+  btn.disabled = false;
+  if (fromEditor){
+    inline.className = "vinline " + (res.state === "valid" ? "ok" : "bad");
+    inline.textContent = res.state === "valid" ? "\u2713 Valid. This record matches the original signature."
+      : res.state === "changed" ? "\u2717 Changed. The signature doesn\u2019t match this record. Details are shown above."
+      : "\u2717 Can\u2019t check this record. Details are shown above.";
+    out.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"nearest"});
+  }
+  if (res.state === "valid"){
+    out.innerHTML = '<div class="vresult ok">'+ICON_OK+'<div><strong>Valid credential</strong><p>Issued by IndustryProof and unchanged since it was signed.</p>'+resultFields(res.cred.record)+'</div></div>';
+  } else if (res.state === "changed"){
+    out.innerHTML = '<div class="vresult bad">'+ICON_NO+'<div><strong>This record has been changed</strong><p>The signature doesn\u2019t match the contents, so someone edited it after it was issued. Don\u2019t trust what it says.</p>'+resultFields(res.cred.record)+'</div></div>';
+  } else {
+    out.innerHTML = '<div class="vresult bad">'+ICON_WARN+'<div><strong>Can\u2019t check this record</strong><p>'+esc(res.msg)+'</p></div></div>';
+  }
+}
+function lookup(){
+  const v = $("#vId").value.trim();
+  const id = Object.keys(CREDENTIALS).find(k => CREDENTIALS[k].id === v || v.endsWith(CREDENTIALS[k].id));
+  if (!v){ $("#vResult").innerHTML = '<div class="vresult bad">'+ICON_WARN+'<div><strong>Enter a credential ID</strong><p>It starts with cred_ and is on the candidate\u2019s result or link.</p></div></div>'; return; }
+  if (!id){ $("#vResult").innerHTML = '<div class="vresult bad">'+ICON_WARN+'<div><strong>No credential found</strong><p>Nothing matches '+esc(v)+'. Check the ID for typos, or ask the candidate for their credential link.</p></div></div>'; return; }
+  loadCredential(id); runCheck($("#vJson").value);
+}
+function renderVerify(){
+  if (vLoaded !== current){ loadCredential(current); }
+  runCheck($("#vJson").value);
+}
+$("#btnLookup").addEventListener("click", lookup);
+$("#vId").addEventListener("keydown", e => { if (e.key === "Enter") lookup(); });
+$$("[data-sample]").forEach(b => b.addEventListener("click", () => { current = b.dataset.sample; loadCredential(current); runCheck($("#vJson").value); }));
+$("#btnVerify").addEventListener("click", () => runCheck($("#vJson").value, true));
+$("#vJson").addEventListener("input", () => { const i = $("#vInline"); i.className = "vinline"; i.textContent = "Edited. Click Verify this record to check it."; });
+$("#btnReset").addEventListener("click", () => { loadCredential(vLoaded || current); runCheck($("#vJson").value, true); });
+
+/* ---------- Company side: assessments home ---------- */
+const ICON_CHECK_SM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+/* Scene artwork: the real Marble render when we have one, a drawn stand-in otherwise */
+let artN = 0;
+function sceneArt(kind, photo, label){
+  if (photo) return '<img src="'+esc(photo)+'" alt="">';
+  if (kind === "robot") return '<img src="scene_robot.jpg" alt="">';
+  if (kind === "solar") return '<img src="scene_solar.jpg" alt="">';
+  if (kind === "cleanroom" || kind === "generic")
+    return '<div class="ph"><span class="mini-orb" aria-hidden="true"></span><span class="ph-t">'+esc(label || (kind === "cleanroom" ? "Cleanroom bay" : "Your site"))+'</span><span class="ph-s">World Labs scene goes here</span></div>';
+  const n = ++artN;
+  if (kind === "cleanroom-drawn") return '<svg viewBox="0 0 400 195" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+
+    '<defs><linearGradient id="cg'+n+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF3FC"/><stop offset="1" stop-color="#93BFE7"/></linearGradient>'+
+    '<linearGradient id="ch'+n+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".85"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".25"/></linearGradient>'+
+    '<pattern id="cp'+n+'" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="1.1" fill="#5D8FC0" fill-opacity=".55"/></pattern></defs>'+
+    '<rect width="400" height="195" fill="url(#cg'+n+')"/>'+
+    '<rect y="130" width="400" height="65" fill="#BFD8EF"/><rect y="130" width="400" height="65" fill="url(#cp'+n+')"/>'+
+    '<line x1="0" y1="130" x2="400" y2="130" stroke="#7FA9D2" stroke-width="1.5"/>'+
+    '<rect x="18" y="38" width="72" height="80" rx="3" fill="#FFFFFF" fill-opacity=".4" stroke="#8DB4DA"/><line x1="54" y1="38" x2="54" y2="118" stroke="#8DB4DA"/>'+
+    '<rect x="120" y="28" width="170" height="44" rx="3" fill="url(#ch'+n+')" stroke="#9CC0E2"/>'+
+    '<rect x="120" y="72" width="170" height="58" rx="3" fill="#F7FAFD" stroke="#6F9FCB"/>'+
+    '<rect x="132" y="78" width="40" height="16" rx="2" fill="#CFE2F3" stroke="#8DB4DA"/><rect x="185" y="78" width="40" height="16" rx="2" fill="#CFE2F3" stroke="#8DB4DA"/><rect x="238" y="78" width="40" height="16" rx="2" fill="#CFE2F3" stroke="#8DB4DA"/>'+
+    '<polygon points="306,34 320,58 292,58" fill="#F4C766" stroke="#7A5A10"/><rect x="305" y="42" width="2.5" height="9" fill="#5A400A"/>'+
+    '<ellipse cx="205" cy="152" rx="44" ry="8" fill="#3F7FC8" fill-opacity=".38"/><ellipse cx="232" cy="157" rx="16" ry="4" fill="#3F7FC8" fill-opacity=".3"/>'+
+    '<circle cx="350" cy="96" r="10" fill="#D4F1DE" stroke="#3E9E6A" stroke-width="2"/><path d="M344 96h12M350 90v12" stroke="#3E9E6A" stroke-width="2.5"/>'+
+    '<circle cx="100" cy="104" r="7" fill="#FFFFFF" stroke="#5D8FC0" stroke-width="1.5"/><rect x="93" y="112" width="14" height="20" rx="5" fill="#FFFFFF" stroke="#5D8FC0" stroke-width="1.5"/>'+
+    '</svg>';
+  return '<svg viewBox="0 0 400 195" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="gg'+n+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1E2227"/><stop offset="1" stop-color="#2B66AE" stop-opacity=".55"/></linearGradient></defs><rect width="400" height="195" fill="url(#gg'+n+')"/><g stroke="#86C2F4" stroke-opacity=".25" fill="none"><path d="M0 150h400M0 120h400"/><path d="M40 195L120 120M200 195V120M360 195L280 120"/></g></svg>'+
+    (label ? '<span class="gen-label">'+esc(label)+'</span>' : '');
+}
+function pinsHTML(hazards){
+  return (hazards || []).filter(h => h.x != null).map(h => '<span class="pin'+(h.x > 58 ? ' flip' : '')+'" style="left:'+h.x+'%;top:'+h.y+'%"><span class="pd"></span><span class="pl">'+esc(h.label)+'</span></span>').join("");
+}
+const ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+const ICON_PEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>';
+
+const ASSESSMENTS = [
+  {id:"spill-live", title:"Chemical spill at wet bench", industry:"Semiconductor manufacturing", art:"cleanroom", photo:null, rubric:"Rubric v1 · Dana Ruiz, EHS Lead", invited:3, completed:2, passed:1, status:"Live", action:"review"},
+  {id:"robot-draft", title:"Robot cell reset", industry:"Robotics & automation", art:"robot", photo:null, rubric:"Rubric not approved yet", invited:0, completed:0, passed:0, status:"Draft", action:"robot"},
+  {id:"solar-draft", title:"Rooftop install, inverter fault", industry:"Solar installation", art:"solar", photo:null, rubric:"Rubric not approved yet", invited:0, completed:0, passed:0, status:"Draft", action:"solar"}
+];
+let reminderSent = false;
+function openAssessment(id){
+  const a = ASSESSMENTS.find(x => x.id === id); if (!a) return;
+  if (a.action === "review"){ current = "jordan"; go("dash"); }
+  else if (a.action === "robot"){ resetBuilder("robot"); go("build"); }
+  else if (a.action === "solar"){ resetBuilder("solar"); go("build"); }
+  else go("build");
+}
+function renderHome(){
+  const sum = k => ASSESSMENTS.reduce((a,x) => a + x[k], 0);
+  const live = ASSESSMENTS.filter(a => a.status === "Live").length;
+  const tile = (v,k) => '<div class="cut stat-tile"><div class="v">'+v+'</div><div class="k">'+k+'</div></div>';
+  const done = sum("completed");
+  $("#homeHeroStat").innerHTML = '<div class="big">'+done+'</div><div class="lbl">'+(done === 1 ? "Result" : "Results")+' ready to review · '+live+' live '+(live === 1 ? "assessment" : "assessments")+'</div><button class="linkbtn" type="button" data-go="dash">Open review</button>';
+  $("#btnHeroReview").textContent = "Review results (" + done + ")";
+  $("#homeCount").textContent = ASSESSMENTS.length + (ASSESSMENTS.length === 1 ? " assessment" : " assessments");
+  $("#homeCards").innerHTML = ASSESSMENTS.map(a => {
+    const pct = a.invited ? Math.round(a.completed / a.invited * 100) : 0;
+    const label = a.action === "review" ? "Review results" : a.status === "Draft" ? "Continue setup" : "Manage";
+    return '<article class="acard">'+
+      '<div class="art">'+sceneArt(a.art, a.photo, a.art === "cleanroom" ? "Cleanroom bay" : "Your site")+'<span class="chip st-chip '+(a.status==="Live"?"pass":"warn")+'">'+a.status+'</span></div>'+
+      '<div class="acard-body"><div><div class="t">'+esc(a.title)+'</div><div class="meta">'+esc(a.industry)+'</div></div>'+
+      '<div class="prog"><div class="row"><span>'+a.completed+' of '+a.invited+' completed</span><span>'+(a.completed ? a.passed+' passed' : '—')+'</span></div><div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
+      '<div class="meta">'+esc(a.rubric)+'</div>'+
+      '<button class="btn'+(a.action==="review"?" btn-lime":"")+'" type="button" data-assess="'+a.id+'">'+label+'</button></div></article>';
+  }).join("") +
+    '<button class="acard new" type="button" id="cardNew"><span class="plus">'+ICON_PLUS+'</span><strong>New assessment</strong><span class="small">Describe your site and scenario. We draft the rest.</span></button>';
+  $$("#homeCards [data-assess]").forEach(b => b.addEventListener("click", () => openAssessment(b.dataset.assess)));
+  $("#cardNew").addEventListener("click", () => { resetBuilder("semi"); go("build"); });
+
+  const attn = [
+    {cls:"fail", icon:ICON_WARN, text:"Riley Chen hit an automatic fail on Chemical spill at wet bench.", act:"Review", fn:() => { current = "riley"; go("dash"); }},
+    {cls:"ice", icon:ICON_CLOCK, text:"Taylor Brooks was invited 2 days ago and hasn’t started.", act: reminderSent ? "Reminder sent" : "Send a reminder", fn:() => { reminderSent = true; renderHome(); }, done:reminderSent}
+  ];
+  if (ASSESSMENTS.some(a => a.id === "robot-draft" && a.status === "Draft"))
+    attn.push({cls:"warn", icon:ICON_PEN, text:"Robot cell reset is waiting for rubric approval.", act:"Continue setup", fn:() => openAssessment("robot-draft")});
+  $("#homeAttn").innerHTML = attn.map((x,i) => '<li><span class="ai '+x.cls+'">'+x.icon+'</span><div class="tx"><span>'+esc(x.text)+'</span><button class="linkbtn" type="button" data-attn="'+i+'"'+(x.done?' disabled':'')+'>'+esc(x.act)+'</button></div></li>').join("");
+  $$("#homeAttn [data-attn]").forEach(b => b.addEventListener("click", () => attn[+b.dataset.attn].fn()));
+
+  $("#homeRecent").innerHTML = Object.entries(CANDIDATES).map(([id,c]) =>
+    '<li><button type="button" data-recent="'+id+'"><span class="av">'+esc(c.candidate.initials)+'</span><span><span class="nm">'+esc(c.candidate.name)+'</span><br><span class="sb">'+esc(c.scenario.title)+'</span></span><span class="chip '+(c.result.status==="pass"?"pass":"fail")+'">'+c.result.score+'/'+c.result.max_score+'</span></button></li>').join("");
+  $$("#homeRecent [data-recent]").forEach(b => b.addEventListener("click", () => { current = b.dataset.recent; go("dash"); }));
+}
+$("#btnNew").addEventListener("click", () => { resetBuilder("semi"); go("build"); });
+
+/* ---------- Company side: assessment builder ---------- */
+const INDUSTRIES = [
+  {id:"semi", label:"Semiconductor manufacturing"},
+  {id:"robot", label:"Robotics & automation"},
+  {id:"solar", label:"Solar installation"},
+  {id:"oil", label:"Oil & gas"}
+];
+const indLabel = id => (INDUSTRIES.find(i => i.id === id) || {label:id}).label;
+const LIBRARY = {
+  semi:[{id:"spill", title:"Chemical spill at wet bench", d:"Checks an acid wet bench, gets pushed to skip PPE, then finds liquid on the floor."},
+        {id:"gas", title:"Toxic gas cabinet alarm", d:"Template in progress.", soon:true}],
+  robot:[{id:"robot", title:"Robot cell reset", d:"A part falls inside a paused robot cell, and the supervisor says to just reach in."},
+         {id:"amr", title:"Mobile robot near-miss", d:"Template in progress.", soon:true}],
+  solar:[{id:"roof", title:"Rooftop install, inverter fault", d:"The crew lead pushes to skip the harness, then the inverter faults with a burning smell."},
+         {id:"storm", title:"Storm damage inspection", d:"Template in progress.", soon:true}],
+  oil:[{id:"h2s", title:"H₂S alarm on the wellsite", d:"Template in progress.", soon:true}]
+};
+const TEMPLATES = {
+  spill:{
+    title:"Chemical spill at wet bench",
+    scenePrompt:"Semiconductor cleanroom bay, bright white walls and ceiling, perforated raised floor, chemical wet bench with a glass fume hood and labeled acid tanks, safety shower and eyewash station on the wall nearby, a small puddle of clear liquid on the floor in front of the wet bench, yellow chemical warning signs, gowning room visible through a glass window, no people, no logos",
+    hazards:[{label:"Acid wet bench", x:47.5, y:42},{label:"Liquid on the floor", x:46.5, y:90},{label:"Eyewash and shower", x:82.5, y:27},{label:"Technician nearby", x:80, y:62}],
+    image:null, art:"cleanroom",
+    agent:{name:"Sam", role:"Shift lead", tone:"Busy, a little impatient and behind schedule. Sounds like a real coworker. Never coaches or hints at answers.",
+      flow:[{k:"Opening", line:"Hey, I need you to check the wet bench in bay 3. What do you put on before you go in?"},
+            {k:"Pressure", line:"Gowning takes forever. Just throw on gloves, it's a two-minute job."},
+            {k:"Push again", line:"Seriously, nobody checks. We're behind."},
+            {k:"Failure", line:"Okay, you're at the bench. There's liquid on the floor in front of it. What do you do?"},
+            {k:"Close", line:"Okay, got it. Thanks, that's all for now."}],
+      facts:["The tank holds an acid mixture used for etching","The eyewash and shower are about 10 steps from the bench","One other technician is working nearby","Nobody has been hurt yet"]},
+    rubric:[
+      {label:"Full cleanroom gown before entering", section:"Precaution", critical:false, origin:"base"},
+      {label:"Adds chemical PPE for the wet bench", section:"Precaution", critical:false, origin:"sop"},
+      {label:"Checks which chemical is in use", section:"Precaution", critical:false, origin:"sop"},
+      {label:"Refuses the “just gloves” shortcut", section:"Precaution", critical:true, origin:"base"},
+      {label:"Stops and warns people nearby", section:"Recovery", critical:false, origin:"base"},
+      {label:"Doesn't clean an unknown chemical alone", section:"Recovery", critical:true, origin:"sop"},
+      {label:"Knows where the eyewash or safety shower is", section:"Recovery", critical:false, origin:"sop"},
+      {label:"Reports to the shift lead or safety team", section:"Recovery", critical:false, origin:"base"}
+    ]
+  },
+  robot:{
+    title:"Robot cell reset",
+    scenePrompt:"Industrial factory floor, a single orange six-axis robot arm inside a fenced safety cell of yellow mesh panels, the robot frozen mid-motion with an empty open gripper, a conveyor running past the cell, one metal part lying on the floor inside the cell, closed cell gate with a red lockout station beside it, control panel with an emergency stop outside the fence, amber warning light, no people, no logos",
+    hazards:[{label:"Robot paused mid-task", x:47, y:44},{label:"Part on the floor", x:40, y:88},{label:"Lockout at the gate", x:70, y:30},{label:"E-stop and control panel", x:84, y:72}],
+    image:"scene_robot.jpg", art:"robot",
+    agent:{name:"Alex", role:"Line supervisor", tone:"Under pressure to get the line running again. Pushes for shortcuts. Never coaches or hints at answers.",
+      flow:[{k:"Opening", line:"The robot just stopped. A part fell inside the cell. What do you do before you go in?"},
+            {k:"Pressure", line:"Come on, it's stopped. Just reach in and grab it, we're behind."},
+            {k:"Push again", line:"The line's been down ten minutes. Just grab it."},
+            {k:"Recovery", line:"Okay, you're in. How do you get it running again?"},
+            {k:"Close", line:"Got it. Thanks, that's all for now."}],
+      facts:["The robot is paused, not powered off","The part is lying under the gripper","The lockout station is next to the cell gate","Nobody is inside the cell"]},
+    rubric:[
+      {label:"Doesn't enter while the robot is only paused", section:"Precaution", critical:false, origin:"base"},
+      {label:"Locks out the power before entering", section:"Precaution", critical:true, origin:"sop"},
+      {label:"Confirms the robot can't move before going in", section:"Precaution", critical:false, origin:"sop"},
+      {label:"Refuses the “just reach in” shortcut", section:"Precaution", critical:true, origin:"base"},
+      {label:"Removes the part and checks why it fell", section:"Recovery", critical:false, origin:"base"},
+      {label:"Resets the cell to its starting position", section:"Recovery", critical:false, origin:"sop"},
+      {label:"Restarts at slow speed first", section:"Recovery", critical:false, origin:"sop"},
+      {label:"Reports the incident", section:"Recovery", critical:false, origin:"base"}
+    ]
+  }
+};
+TEMPLATES.roof = {
+  title:"Rooftop install, inverter fault",
+  scenePrompt:"Side of a single-story house on a sunny afternoon, viewed at eye level, half-installed rooftop solar array along the roof edge on aluminum rails, open roof edge with no guardrail, an aluminum extension ladder against the gutter, a safety harness and coiled lifeline on the ground by the ladder, a grey inverter and disconnect switch on the house wall at chest height with a scorch mark at the vents, orange conduit running up to the roof, a toolbag and cable spool on the concrete, no people, no logos",
+  hazards:[{label:"Live panels in sunlight", x:58, y:8},{label:"Roof edge, no guardrail", x:24, y:19},{label:"Cord across the walkway", x:37, y:91},{label:"Inverter on the side wall", x:null, y:null}],
+  image:"scene_solar.jpg", art:"solar",
+  agent:{name:"Marcus", role:"Crew lead", tone:"Friendly but rushing to finish before the weather turns. Pushes once to skip the harness. Never coaches or hints at answers.",
+    flow:[{k:"Opening", line:"We're starting the install. What do you do before you get on the roof?"},
+          {k:"Pressure", line:"It's a low roof and we're behind. Skip the harness today."},
+          {k:"Push again", line:"Seriously, it's one story. Nobody's checking."},
+          {k:"Failure", line:"The inverter just faulted and there's a burning smell. What do you do?"},
+          {k:"Close", line:"Okay, got it. Thanks, that's all for now."}],
+    facts:["The roof is one story with no guardrail","The panels are wired and sitting in full sun","The inverter and disconnect are on the side wall by the driveway","Nobody has been hurt"]},
+  rubric:[
+    {label:"Wears a harness tied to an anchor point", section:"Precaution", critical:false, origin:"base"},
+    {label:"Checks roof conditions before going up", section:"Precaution", critical:false, origin:"base"},
+    {label:"Treats panels as live in sunlight", section:"Precaution", critical:false, origin:"sop"},
+    {label:"Refuses the “skip the harness” shortcut", section:"Precaution", critical:true, origin:"base"},
+    {label:"Stops work and moves away from the inverter", section:"Recovery", critical:false, origin:"base"},
+    {label:"Shuts off the disconnects only if safe to reach", section:"Recovery", critical:false, origin:"sop"},
+    {label:"Calls support, or 911 if there's smoke or fire", section:"Recovery", critical:false, origin:"sop"},
+    {label:"Reports the incident", section:"Recovery", critical:false, origin:"base"}
+  ]
+};
+function genericTemplate(title, industry){
+  return {
+    title,
+    scenePrompt:(B.siteDesc || industry+" work site") + ". Show the work area for this scenario: " + title + ". Visible hazards, realistic lighting, no people, no logos",
+    hazards:[{label:"Taken from your site description", x:null, y:null}],
+    image:null, art:"generic",
+    agent:{name:"Sam", role:"Supervisor", tone:"Busy and behind schedule. Pushes for a shortcut once. Never coaches or hints at answers.",
+      flow:[{k:"Opening", line:"Before you start this job, what do you check and what do you put on?"},
+            {k:"Pressure", line:"We're behind. Can you skip that step just this once?"},
+            {k:"Push again", line:"Seriously, nobody checks."},
+            {k:"Failure", line:"Something just went wrong: " + title + ". What do you do?"},
+            {k:"Close", line:"Okay, got it. Thanks, that's all for now."}],
+      facts:["Built from your site description. Add the facts the agent should know."]},
+    rubric:[
+      {label:"Identifies the main hazards before starting", section:"Precaution", critical:false, origin:"base"},
+      {label:"Names the PPE the task requires", section:"Precaution", critical:false, origin:"sop"},
+      {label:"Isolates energy or the hazard before work starts", section:"Precaution", critical:false, origin:"sop"},
+      {label:"Refuses the unsafe shortcut", section:"Precaution", critical:true, origin:"base"},
+      {label:"Stops work and makes the area safe", section:"Recovery", critical:false, origin:"base"},
+      {label:"Warns people nearby", section:"Recovery", critical:false, origin:"base"},
+      {label:"Escalates to the right person", section:"Recovery", critical:false, origin:"sop"},
+      {label:"Reports the incident", section:"Recovery", critical:false, origin:"base"}
+    ]
+  };
+}
+const PRESETS = {
+  semi:{industry:"semi", role:"Equipment Technician", siteName:"Fab 2 · Bay 3 cleanroom", siteDesc:"ISO class 5 cleanroom bay with an acid wet bench, a gowning room behind glass, and an eyewash and safety shower on the wall.", scenario:"spill"},
+  robot:{industry:"robot", role:"Robotics Technician", siteName:"Plant 1 · Line 4 robot cell", siteDesc:"Fenced robot cell with a six-axis arm, a conveyor running past it, a lockout station by the gate and an E-stop panel outside the fence.", scenario:"robot"},
+  solar:{industry:"solar", role:"Solar Installer", siteName:"Residential job · 14 Maple Ct", siteDesc:"Single-story house with a low-slope roof, a half-installed panel array along the edge, no guardrail, and the inverter and disconnect on the side wall.", scenario:"roof"},
+  oil:{industry:"oil", role:"Field Operator", siteName:"Wellsite 7", siteDesc:"Wellhead pad with a separator, storage tanks and a gas detector on the fence line.", scenario:"custom"}
+};
+const B = {};
+function resetBuilder(preset){
+  const p = PRESETS[preset] || PRESETS.semi;
+  Object.assign(B, {step:1, industry:p.industry, role:p.role, siteName:p.siteName, siteDesc:p.siteDesc, media:[], scenario:p.scenario, custom:"",
+    tracks:{precaution:true, recovery:true}, sops:[], draft:null, generating:false, genStep:0, tab:"scene",
+    approved:null, approver:{name:"Dana Ruiz", role:"EHS Lead"}, reviewed:false, invites:[], published:false, assessId:null});
+}
+resetBuilder("semi");
+let genTimer = 0;
+const STEP_NAMES = ["Role and site","Scenario","Review drafts","Test and approve","Invite candidates"];
+const stepEnabled = n => n <= 2 || (n <= 4 && !!B.draft) || (n === 5 && !!B.approved);
+const stepDone = n => (n === 1 && (B.step > 1 || !!B.draft)) || (n === 2 && !!B.draft) || ((n === 3 || n === 4) && !!B.approved) || (n === 5 && B.published);
+function invalidateDraft(){ B.draft = null; B.approved = null; B.reviewed = false; B.published = false; B.invites = []; B.assessId = null; }
+
+function head(n, title, sub){
+  return '<div class="bhead"><div class="eyebrow">Step '+n+' of 5</div><div class="bprog" aria-hidden="true"><i style="width:'+(n*20)+'%"></i></div><h2>'+esc(title)+'</h2><p>'+esc(sub)+'</p></div>';
+}
+const artFor = id => id === "spill" ? "cleanroom" : id === "robot" ? "robot" : id === "roof" ? "solar" : "generic";
+const firstPhoto = () => { const m = B.media.find(x => x.kind === "image"); return m ? m.url : null; };
+function renderPreview(){
+  const el = $("#bpreview"); if (!el) return;
+  const d = B.draft;
+  const tpl = d || TEMPLATES[B.scenario] || null;
+  const title = d ? d.title : B.scenario === "custom" ? ((B.custom.trim().split(/\n/)[0]) || "Your custom scenario") : (tpl ? tpl.title : "");
+  const agent = tpl ? tpl.agent : {name:"Sam", role:"Supervisor", flow:[{line:"The opening line appears here once the drafts are generated."}]};
+  const tracks = [B.tracks.precaution ? "Safety precaution" : null, B.tracks.recovery ? "Failure recovery" : null].filter(Boolean);
+  const photo = firstPhoto();
+  const crit = d ? d.rubric.filter(r => r.critical).length : null;
+  el.innerHTML = '<div class="cut pv">'+
+    '<div class="pv-top"><div class="eyebrow">What candidates will see</div></div>'+
+    '<div class="art">'+sceneArt(B.scenario === "custom" ? "generic" : artFor(B.scenario), photo, B.scenario === "custom" && !photo ? "Your site" : "")+(d && d.image && !photo ? pinsHTML(d.hazards) : '')+'</div>'+
+    '<div class="pv-body">'+
+      '<div><div class="small muted">'+esc(B.siteName || "Your site")+' · '+esc(B.role || "Role")+'</div><div class="pv-title">'+esc(title)+'</div></div>'+
+      '<div class="pv-agent"><span class="mini-orb" aria-hidden="true"></span><div><div class="nm">'+esc(agent.name)+'</div><div class="small muted">'+esc(agent.role)+' · AI voice agent</div></div></div>'+
+      '<p class="pv-line">“'+esc(agent.flow[0].line)+'”</p>'+
+      '<div class="filelist">'+tracks.map(t => '<span class="chip">'+t+'</span>').join("")+'</div>'+
+      (d ? '<div class="pv-stats"><div><span class="v">'+d.rubric.length+'</span><span class="k">Rubric items</span></div><div><span class="v">'+crit+'</span><span class="k">Critical fails</span></div></div>' : '')+
+      (B.approved ? '<span class="chip pass">Rubric v'+d.version+' approved</span>' : d ? '<span class="chip warn">Rubric awaiting approval</span>' : '<span class="chip">Draft not generated yet</span>')+
+    '</div></div>';
+}
+function foot(back, nextHTML){
+  return '<div class="bfoot">'+(back ? '<button class="btn" type="button" data-back>Back</button>' : '<span></span>')+nextHTML+'</div>';
+}
+function thumbsHTML(){
+  if (!B.media.length) return "";
+  return '<div class="thumbs">'+B.media.map(m => m.kind === "image"
+    ? '<img src="'+esc(m.url)+'" alt="'+esc(m.name)+'">'
+    : '<div class="vid" title="'+esc(m.name)+'">Video · '+esc(m.name)+'</div>').join("")+'</div>';
+}
+
+function step1(){
+  return head(1, "Role and site", "Tell us who you're hiring and where they'll work.")+
+  '<div class="form-grid">'+
+    '<label class="field" for="fIndustry"><span>Industry</span><select id="fIndustry">'+INDUSTRIES.map(i => '<option value="'+i.id+'"'+(i.id===B.industry?' selected':'')+'>'+esc(i.label)+'</option>').join("")+'</select></label>'+
+    '<label class="field" for="fRole"><span>Role you’re hiring for</span><input type="text" id="fRole" value="'+esc(B.role)+'"></label>'+
+    '<label class="field full" for="fSite"><span>Site name</span><input type="text" id="fSite" value="'+esc(B.siteName)+'"></label>'+
+    '<label class="field full" for="fDesc"><span>Describe the site</span><textarea id="fDesc" rows="3">'+esc(B.siteDesc)+'</textarea><small>Layout, equipment and hazards. This shapes the 3D scene.</small></label>'+
+    '<div class="field full"><span>Photos or video of the site</span>'+
+      '<label class="drop" for="fMedia"><input type="file" id="fMedia" accept="image/*,video/*" multiple><strong>Add photos or a walkthrough video</strong><small>World Labs turns these into an explorable 3D replica of your site.</small></label>'+
+      thumbsHTML()+'</div>'+
+  '</div>'+foot(false, '<button class="btn btn-lime" type="button" data-next>Continue</button>');
+}
+function bind1(p){
+  $("#fIndustry", p).addEventListener("change", e => {
+    B.industry = e.target.value;
+    const first = (LIBRARY[B.industry] || []).find(s => !s.soon);
+    B.scenario = first ? first.id : "custom";
+    const pre = PRESETS[B.industry];
+    if (pre){
+      Object.assign(B, {role:pre.role, siteName:pre.siteName, siteDesc:pre.siteDesc});
+      $("#fRole", p).value = B.role; $("#fSite", p).value = B.siteName; $("#fDesc", p).value = B.siteDesc;
+    }
+    invalidateDraft(); renderSteps(); renderPreview();
+  });
+  $("#fRole", p).addEventListener("input", e => { B.role = e.target.value; renderPreview(); });
+  $("#fSite", p).addEventListener("input", e => { B.siteName = e.target.value; renderPreview(); });
+  $("#fDesc", p).addEventListener("input", e => { B.siteDesc = e.target.value; });
+  $("#fMedia", p).addEventListener("change", e => {
+    Array.from(e.target.files || []).forEach(f => {
+      B.media.push({name:f.name, kind:f.type.startsWith("video") ? "video" : "image", url:URL.createObjectURL(f)});
+    });
+    if (B.draft){ const ph = B.media.find(m => m.kind === "image"); if (ph){ B.draft.preview = ph.url; B.draft.previewFrom = "Generated from your photos"; } }
+    renderBuild();
+  });
+}
+
+function step2(){
+  const lib = LIBRARY[B.industry] || [];
+  return head(2, "Scenario", "Pick a template for your industry or describe your own. Templates start from common industry practice.")+
+  '<div class="scen-grid">'+lib.map(s =>
+    '<button class="scard" type="button" data-scen="'+s.id+'" aria-pressed="'+(B.scenario===s.id)+'"'+(s.soon?' disabled':'')+'><span class="art">'+sceneArt(artFor(s.id), null, s.soon ? s.title : "")+'</span><span class="eyebrow">'+(s.soon?'Coming soon':'Template')+'</span><span class="t">'+esc(s.title)+'</span><span class="d">'+esc(s.d)+'</span></button>').join("")+
+    '<button class="scard" type="button" data-scen="custom" aria-pressed="'+(B.scenario==="custom")+'"><span class="art">'+sceneArt("generic", null, "Your scenario")+'</span><span class="eyebrow">Custom</span><span class="t">Describe your own</span><span class="d">Tell us what goes wrong on your site and we’ll draft it.</span></button>'+
+  '</div>'+
+  (B.scenario === "custom" ? '<label class="field" for="fCustom"><span>What happens in the scenario?</span><textarea id="fCustom" rows="3" placeholder="A pressure relief valve starts hissing during a routine check, and the operator wants to keep the line running.">'+esc(B.custom)+'</textarea><small>The first line becomes the scenario title.</small></label>' : '')+
+  '<div class="field"><span>What to assess</span><div class="toggles">'+
+    '<label class="tog" for="tPre"><input type="checkbox" id="tPre"'+(B.tracks.precaution?' checked':'')+'>Safety precaution</label>'+
+    '<label class="tog" for="tRec"><input type="checkbox" id="tRec"'+(B.tracks.recovery?' checked':'')+'>Failure recovery</label>'+
+  '</div></div>'+
+  '<div class="field"><span>Your procedures <small>(optional)</small></span>'+
+    '<label class="drop" for="fSop"><input type="file" id="fSop" accept=".pdf,.doc,.docx,.txt,.md" multiple><strong>Add SOPs or safety procedures</strong><small>Rubric items cite the procedure they come from.</small></label>'+
+    (B.sops.length ? '<div class="filelist">'+B.sops.map(n => '<span class="chip">'+esc(n)+'</span>').join("")+'</div>' : '')+
+  '</div>'+
+  '<p class="err" id="genErr" hidden></p>'+
+  foot(true, '<button class="btn btn-lime" type="button" id="btnGen">'+(B.draft ? 'Regenerate drafts' : 'Generate drafts')+'</button>');
+}
+function bind2(p){
+  $$("[data-scen]", p).forEach(b => b.addEventListener("click", () => {
+    if (B.scenario !== b.dataset.scen){ B.scenario = b.dataset.scen; invalidateDraft(); }
+    renderBuild();
+  }));
+  const fc = $("#fCustom", p); if (fc) fc.addEventListener("input", e => { B.custom = e.target.value; renderPreview(); });
+  $("#tPre", p).addEventListener("change", e => { B.tracks.precaution = e.target.checked; renderPreview(); });
+  $("#tRec", p).addEventListener("change", e => { B.tracks.recovery = e.target.checked; renderPreview(); });
+  $("#fSop", p).addEventListener("change", e => {
+    Array.from(e.target.files || []).forEach(f => { if (!B.sops.includes(f.name)) B.sops.push(f.name); });
+    renderBuild();
+  });
+  $("#btnGen", p).addEventListener("click", startGenerate);
+}
+function buildDraft(){
+  let t;
+  if (B.scenario === "custom"){
+    const title = (B.custom.trim().split(/\n/)[0] || "Custom scenario").slice(0, 90);
+    t = genericTemplate(title, indLabel(B.industry));
+  } else t = TEMPLATES[B.scenario];
+  const d = JSON.parse(JSON.stringify(t));
+  let sopIdx = 0;
+  d.rubric = d.rubric
+    .filter(r => r.section === "Precaution" ? B.tracks.precaution : B.tracks.recovery)
+    .map(r => {
+      let source = "Industry baseline";
+      if (r.origin === "sop") source = B.sops.length ? "From " + B.sops[(sopIdx++) % B.sops.length] : "Common practice";
+      return {label:r.label, section:r.section, critical:r.critical, source};
+    });
+  const photo = B.media.find(m => m.kind === "image");
+  d.preview = photo ? photo.url : d.image;
+  d.previewFrom = photo ? "Generated from your photos" : (d.image ? "Generated scene" : null);
+  d.version = 1;
+  return d;
+}
+function startGenerate(){
+  const err = $("#genErr");
+  if (!B.tracks.precaution && !B.tracks.recovery){ err.hidden = false; err.textContent = "Choose at least one thing to assess: safety precaution, failure recovery or both."; return; }
+  if (B.scenario === "custom" && !B.custom.trim()){ err.hidden = false; err.textContent = "Describe what happens in your scenario, then generate."; return; }
+  B.generating = true; B.genStep = 0; renderBuild();
+  const advance = () => {
+    B.genStep++;
+    if (B.genStep >= 3){
+      invalidateDraft(); B.draft = buildDraft(); B.generating = false; B.step = 3; B.tab = "scene"; renderBuild();
+    } else { renderBuild(); genTimer = setTimeout(advance, 750); }
+  };
+  clearTimeout(genTimer); genTimer = setTimeout(advance, 750);
+}
+function genView(){
+  const lines = ["Building the 3D site in World Labs Marble","Writing the voice agent’s call script","Drafting the rubric from your procedures"];
+  return head(2, "Generating drafts", "In the live product this takes a few minutes. You can leave and come back.")+
+    '<div class="gen">'+lines.map((l,i) => {
+      const cls = i < B.genStep ? "ok" : i === B.genStep ? "now" : "";
+      return '<div class="gen-line '+cls+'"><span class="st">'+(i < B.genStep ? ICON_CHECK_SM : '')+'</span>'+esc(l)+'</div>';
+    }).join("")+'</div>';
+}
+
+function step3(){
+  const d = B.draft, lock = B.approved ? ' disabled' : '';
+  const tabs = [["scene","Scene"],["agent","Voice agent"],["rubric","Rubric ("+d.rubric.length+")"]];
+  let pane = "";
+  if (B.tab === "scene"){
+    pane =
+      '<div class="scene-prev">'+(d.preview
+        ? '<img src="'+esc(d.preview)+'" alt="Preview of the generated 3D site">'
+        : sceneArt(d.art, null, d.art === "generic" ? "Your scene is generating in World Labs Marble" : "Cleanroom bay"))+
+        (d.preview && d.preview === d.image ? pinsHTML(d.hazards) : '')+
+        '<span class="chip prev-tag">'+esc(d.previewFrom || (d.art === "generic" ? "Generating" : "Scene preview"))+'</span></div>'+
+      '<div class="field"><span>Hazards placed in the scene</span><div class="filelist">'+d.hazards.map(h => '<span class="chip"><span class="live-dot" style="background:var(--fail)"></span>'+esc(h.label)+'</span>').join("")+'</div><small>Each hazard is a spot the candidate can notice in the 3D site.</small></div>'+
+      '<details><summary>Scene prompt sent to World Labs</summary><div class="promptbox" style="margin-top:10px">'+esc(d.scenePrompt)+'</div></details>';
+  } else if (B.tab === "agent"){
+    pane =
+      '<div class="persona"><span class="mini-orb" aria-hidden="true"></span><div><div class="nm">'+esc(d.agent.name)+'</div><div class="small muted">'+esc(d.agent.role)+' · AI voice agent</div></div></div>'+
+      '<label class="field" for="aTone"><span>Personality and tone</span><textarea id="aTone" rows="2"'+lock+'>'+esc(d.agent.tone)+'</textarea></label>'+
+      ('speechSynthesis' in window ? '<div><button class="btn hear" type="button" id="btnHear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 010 6"/></svg>Hear the opening line</button> <span class="small muted">Browser voice for preview. The live agent uses ElevenLabs.</span></div>' : '')+
+      '<div class="field"><span>Call flow</span><ol class="tl">'+d.agent.flow.map((f,i) => {
+        const kind = /pressure|push/i.test(f.k) ? "pressure" : /failure|recovery/i.test(f.k) ? "failure" : "";
+        return '<li><span class="dt '+kind+'"></span><span class="k">'+esc(f.k)+'</span><input type="text" data-flow="'+i+'" value="'+esc(f.line)+'" aria-label="'+esc(f.k)+' line"'+lock+'></li>';
+      }).join("")+'</ol></div>'+
+      '<div class="field"><span>Facts the agent shares only if asked</span><ul class="facts">'+d.agent.facts.map(f => '<li>'+esc(f)+'</li>').join("")+'</ul></div>';
+  } else {
+    pane =
+      (B.approved ? '<div class="approved">'+ICON_OK+'<div><strong>Locked · rubric v'+d.version+'</strong><p>Approved by '+esc(B.approved.name)+', '+esc(B.approved.role)+'. Candidates are scored against this version. Start a new version to make changes.</p></div></div><div><button class="btn" type="button" id="btnNewVer">Start v'+(d.version+1)+'</button></div>' : '')+
+      '<div class="tracks">'+[["Precaution","trk-pre","Safety precaution"],["Recovery","trk-rec","Failure recovery"]].map(([sec,cls,name]) => {
+        const items = d.rubric.map((r,i) => ({r,i})).filter(x => x.r.section === sec);
+        return '<div class="track '+cls+'"><div class="track-head"><h3>'+name+'</h3><span class="mono small muted">'+items.length+' items</span></div>'+
+          items.map(({r,i}) =>
+            '<div class="ritem'+(r.critical?' crit':'')+'"><textarea rows="2" data-rl="'+i+'" placeholder="Describe what the candidate should do" aria-label="'+name+' item"'+lock+'>'+esc(r.label)+'</textarea>'+
+            '<div class="rmeta"><label class="crit-tog'+(r.critical?' on':'')+'"><input type="checkbox" data-rc="'+i+'"'+(r.critical?' checked':'')+lock+'>Critical fail</label><span class="chip src">'+esc(r.source)+'</span>'+
+            '<button class="iconbtn" type="button" data-rx="'+i+'" aria-label="Remove this item"'+lock+'>'+ICON_NO+'</button></div></div>').join("")+
+          (B.approved ? '' : '<button class="add" type="button" data-add="'+sec+'">+ Add an item</button>')+
+        '</div>';
+      }).join("")+'</div>'+
+      '<p class="note">A critical fail means the candidate fails however many other items they get right. Use it for unsafe shortcuts.</p>';
+  }
+  return head(3, "Review drafts", "Everything here is a draft. Change anything that doesn't match how your site works.")+
+    '<div class="tabs" role="tablist">'+tabs.map(([id,l]) => '<button type="button" role="tab" data-tab="'+id+'" aria-selected="'+(B.tab===id)+'">'+esc(l)+'</button>').join("")+'</div>'+
+    '<div class="tabpane" role="tabpanel">'+pane+'</div>'+
+    foot(true, '<button class="btn btn-lime" type="button" data-next>Continue to test and approve</button>');
+}
+function bind3(p){
+  const d = B.draft;
+  $$("[data-tab]", p).forEach(b => b.addEventListener("click", () => { B.tab = b.dataset.tab; renderBuild(); }));
+  const tone = $("#aTone", p); if (tone) tone.addEventListener("input", e => { d.agent.tone = e.target.value; });
+  $$("[data-flow]", p).forEach(i => i.addEventListener("input", e => { d.agent.flow[+e.target.dataset.flow].line = e.target.value; }));
+  $$("[data-rl]", p).forEach(i => i.addEventListener("input", e => { d.rubric[+e.target.dataset.rl].label = e.target.value; }));
+  $$("[data-rc]", p).forEach(c => c.addEventListener("change", e => {
+    d.rubric[+e.target.dataset.rc].critical = e.target.checked;
+    e.target.closest(".crit-tog").classList.toggle("on", e.target.checked);
+    e.target.closest(".ritem").classList.toggle("crit", e.target.checked);
+    renderPreview();
+  }));
+  const hear = $("#btnHear", p);
+  if (hear) hear.addEventListener("click", () => {
+    try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(d.agent.flow[0].line); u.rate = 1.03; speechSynthesis.speak(u); }catch(e){}
+  });
+  $$("[data-flow]", p).forEach(i => i.addEventListener("input", () => renderPreview()));
+  $$("[data-rx]", p).forEach(b => b.addEventListener("click", () => { d.rubric.splice(+b.dataset.rx, 1); renderBuild(); }));
+  $$("[data-add]", p).forEach(b => b.addEventListener("click", () => {
+    const sec = b.dataset.add;
+    const lastIdx = d.rubric.map(r => r.section).lastIndexOf(sec);
+    const item = {label:"", section:sec, critical:false, source:"Added by you"};
+    d.rubric.splice(lastIdx >= 0 ? lastIdx + 1 : d.rubric.length, 0, item);
+    renderBuild();
+    const idx = d.rubric.indexOf(item), inp = $('[data-rl="'+idx+'"]', $("#bpanel"));
+    if (inp){ inp.placeholder = "Describe what the candidate should do"; inp.focus(); }
+  }));
+  const nv = $("#btnNewVer", p);
+  if (nv) nv.addEventListener("click", () => { d.version += 1; B.approved = null; B.reviewed = false; renderBuild(); });
+}
+
+function calibration(){
+  const r = B.draft.rubric, n = r.length, hasCrit = r.some(x => x.critical);
+  return {hasCrit, n, rows:[
+    {s:"Strong answer that follows procedure", exp:n+"/"+n, got:n+"/"+n, ok:n > 0},
+    {s:"Takes the unsafe shortcut when pushed", exp:"Auto-fail", got:hasCrit ? "Auto-fail" : (n-1)+"/"+n, ok:hasCrit},
+    {s:"Follows procedure but misses one step", exp:Math.max(0,n-1)+"/"+n, got:Math.max(0,n-1)+"/"+n, ok:n > 0}
+  ]};
+}
+function step4(){
+  const c = calibration(), d = B.draft;
+  const table = '<div class="calib-wrap"><table class="calib"><thead><tr><th>Sample answer</th><th>Expected</th><th>Graded</th><th><span class="sr">Match</span></th></tr></thead><tbody>'+
+    c.rows.map(r => '<tr><td>'+esc(r.s)+'</td><td class="num">'+esc(r.exp)+'</td><td class="num">'+esc(r.got)+'</td><td><span class="chip '+(r.ok?"pass":"fail")+'">'+(r.ok?"Match":"Mismatch")+'</span></td></tr>').join("")+
+    '</tbody></table></div>';
+  const ready = !!B.approver.name.trim() && B.reviewed && c.hasCrit && c.n > 0;
+  return head(4, "Test and approve", "Check that the grading matches what your own expert would say, then lock the rubric.")+
+    '<div class="two">'+
+      '<div class="cut sub-card"><h3>Try it yourself</h3><p class="small muted">Take the assessment as a candidate before anyone else does.</p><div><button class="btn" type="button" data-go="brief">Preview as a candidate</button></div></div>'+
+      '<div class="cut sub-card"><h3>Calibration</h3><p class="small muted">Three sample answers, graded with your current rubric.</p>'+table+'</div>'+
+    '</div>'+
+    (c.hasCrit ? '' : '<div class="warnbox">'+ICON_WARN+'<div><strong>No critical fail is set</strong><p>A candidate who takes the unsafe shortcut could still pass. Mark at least one rubric item as a critical fail in Review drafts.</p></div></div>')+
+    (B.approved
+      ? '<div class="approved">'+ICON_OK+'<div><strong>Rubric v'+d.version+' approved</strong><p>Approved by '+esc(B.approved.name)+', '+esc(B.approved.role)+' on '+esc(fmtDate(B.approved.at))+'. It’s locked, so every candidate is scored against the same version.</p></div></div>'+
+        foot(true, '<button class="btn btn-lime" type="button" data-next>Continue to invite</button>')
+      : '<div class="cut sub-card"><h3>Approve the rubric</h3>'+
+          '<p class="small muted">Approval should come from someone who owns safety procedures on this site.</p>'+
+          '<div class="form-grid">'+
+            '<label class="field" for="apName"><span>Approver name</span><input type="text" id="apName" value="'+esc(B.approver.name)+'"></label>'+
+            '<label class="field" for="apRole"><span>Role</span><input type="text" id="apRole" value="'+esc(B.approver.role)+'"></label>'+
+          '</div>'+
+          '<label class="consent" for="apOk"><input type="checkbox" id="apOk"'+(B.reviewed?' checked':'')+'><span>I’ve reviewed every rubric item and critical fail, and they match how we work on this site.</span></label>'+
+          '<div><button class="btn btn-lime" type="button" id="btnApprove"'+(ready?'':' disabled')+'>Approve rubric v'+d.version+'</button></div>'+
+        '</div>'+foot(true, '<span></span>'));
+}
+function bind4(p){
+  const btn = $("#btnApprove", p); if (!btn) return;
+  const c = calibration();
+  const check = () => { btn.disabled = !(B.approver.name.trim() && B.reviewed && c.hasCrit && c.n > 0); };
+  $("#apName", p).addEventListener("input", e => { B.approver.name = e.target.value; check(); });
+  $("#apRole", p).addEventListener("input", e => { B.approver.role = e.target.value; });
+  $("#apOk", p).addEventListener("change", e => { B.reviewed = e.target.checked; check(); });
+  btn.addEventListener("click", () => {
+    B.approved = {name:B.approver.name.trim(), role:B.approver.role.trim() || "Approver", at:new Date().toISOString()};
+    renderBuild();
+  });
+}
+
+const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "assessment";
+function step5(){
+  const d = B.draft, link = "https://industryproof.app/a/" + slugify(d.title) + "-v" + d.version;
+  return head(5, "Invite candidates", "Share the link or send invites. Every candidate is scored against the approved rubric.")+
+    '<div class="field"><span>Assessment link</span><div class="linkrow"><input type="text" id="aLink" readonly value="'+esc(link)+'" aria-label="Assessment link"><button class="btn" type="button" id="btnCopy">Copy link</button></div><small id="copyMsg" aria-live="polite"></small></div>'+
+    '<label class="field" for="fEmails"><span>Candidate emails</span><textarea id="fEmails" rows="3" placeholder="alex@example.com, priya@example.com"></textarea><small>Separate addresses with commas or new lines.</small></label>'+
+    '<p class="err" id="invErr" hidden></p>'+
+    '<div><button class="btn btn-lime" type="button" id="btnInvite">'+(B.published ? 'Send invites' : 'Publish and send invites')+'</button></div>'+
+    (B.invites.length ? '<div class="cut sub-card"><h3>Invited ('+B.invites.length+')</h3><ul class="invlist">'+B.invites.map(i => '<li><span class="mail">'+esc(i)+'</span><span class="chip">Invited</span></li>').join("")+'</ul></div>' : '')+
+    (B.published ? '<div class="approved">'+ICON_OK+'<div><strong>Live</strong><p>'+esc(d.title)+' is live. Results show up in Review as candidates finish.</p></div></div>' : '')+
+    foot(true, '<button class="btn" type="button" data-go="home">Back to assessments</button>');
+}
+function bind5(p){
+  $("#btnCopy", p).addEventListener("click", () => {
+    const inp = $("#aLink", p), msg = $("#copyMsg", p);
+    const fallback = () => { inp.focus(); inp.select(); msg.textContent = "Link selected. Press Ctrl+C or ⌘C to copy."; };
+    try{
+      navigator.clipboard.writeText(inp.value).then(() => { msg.textContent = "Link copied."; }, fallback);
+    }catch(e){ fallback(); }
+  });
+  $("#btnInvite", p).addEventListener("click", () => {
+    const raw = $("#fEmails", p).value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+    const err = $("#invErr", p);
+    if (!raw.length){ err.hidden = false; err.textContent = "Add at least one email address."; return; }
+    const bad = raw.filter(s => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s));
+    if (bad.length){ err.hidden = false; err.textContent = "These don’t look like email addresses: " + bad.join(", ") + ". Fix them and send again."; return; }
+    raw.forEach(m => { if (!B.invites.includes(m)) B.invites.push(m); });
+    const d = B.draft;
+    if (!B.published){
+      B.published = true; B.assessId = "a" + Date.now();
+      ASSESSMENTS.unshift({id:B.assessId, title:d.title, industry:indLabel(B.industry), rubric:"v"+d.version+" · "+B.approved.name+", "+B.approved.role, invited:0, completed:0, passed:0, status:"Live", action:"build"});
+    }
+    const row = ASSESSMENTS.find(a => a.id === B.assessId); if (row) row.invited = B.invites.length;
+    renderBuild();
+  });
+}
+
+function renderSteps(){
+  $("#bsteps").innerHTML = STEP_NAMES.map((nm,i) => {
+    const n = i + 1, done = stepDone(n) && B.step !== n;
+    return '<li><button type="button" data-bstep="'+n+'"'+(B.step===n?' aria-current="step"':'')+(stepEnabled(n) && !B.generating?'':' disabled')+(done?' class="done"':'')+'><span class="dot">'+(done ? ICON_CHECK_SM : n)+'</span><span>'+esc(nm)+'</span></button></li>';
+  }).join("");
+  $$("#bsteps button").forEach(b => b.addEventListener("click", () => { B.step = +b.dataset.bstep; renderBuild(); }));
+}
+function renderBuild(){
+  renderSteps();
+  renderPreview();
+  const p = $("#bpanel");
+  if (B.generating){ p.innerHTML = genView(); return; }
+  if (B.step > 2 && !B.draft) B.step = 2;
+  if (B.step === 5 && !B.approved) B.step = 4;
+  p.innerHTML = [step1, step2, step3, step4, step5][B.step - 1]();
+  [bind1, bind2, bind3, bind4, bind5][B.step - 1](p);
+  const nx = $("[data-next]", p); if (nx) nx.addEventListener("click", () => { B.step = Math.min(5, B.step + 1); renderBuild(); window.scrollTo({top:0}); });
+  const bk = $("[data-back]", p); if (bk) bk.addEventListener("click", () => { B.step = Math.max(1, B.step - 1); renderBuild(); window.scrollTo({top:0}); });
+}
+
+/* ---------- Boot ---------- */
+setCamButtons();
+go("home");
+$("#doneCred").textContent = credId("jordan");
+})();
+</script>
