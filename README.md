@@ -25,7 +25,7 @@ IndustryProof tests how candidates handle a live crisis on a 3D replica of your 
 
 **Built with:** World Labs Marble · ElevenLabs Agents · three.js + Spark · Node · WebCrypto
 
-**Team:** Shubham Jha · Sang Rhee · Claire Liu Yang · Lucas Pham
+**Team:** Shubham Jha · Sang Rhee · Claire Liu Yang
 
 ## Run the demo locally
 
