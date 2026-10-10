@@ -84,7 +84,7 @@ export function describeSignals(signals, turns) {
   const pressured = ts ? ts.some((t) => t.underPressure) : count > 1;
   const wait = (read) => ({ value: '—', unit: '', read, level: 'none' });
 
-  let tone = wait('Waiting for the first answer');
+  let tone = wait('Starts when you talk');
   if (has && count === 1) tone = { value: '0', unit: '/100', read: 'Baseline set from the first answer', level: 'ok' };
   else if (has) {
     const d = finite(s.toneDrift) ? Math.round(s.toneDrift) : 0;
@@ -96,7 +96,7 @@ export function describeSignals(signals, turns) {
     tone = { value: String(d), unit: '/100', read, level: level(d, 25, 50) };
   }
 
-  let rate = wait('Waiting for speech');
+  let rate = wait('Starts when you talk');
   if (has && finite(s.speechRateWpm) && s.speechRateWpm > 0) {
     const d = finite(s.speechRateDeltaPct) ? Math.round(s.speechRateDeltaPct) : 0;
     const pct = `${d > 0 ? '+' : d < 0 ? '−' : '+'}${Math.abs(d)}%`;
@@ -105,7 +105,7 @@ export function describeSignals(signals, turns) {
     rate = { value: String(Math.round(s.speechRateWpm)), unit: 'wpm', read, level: pressured ? level(Math.abs(d), 10, 25) : 'ok' };
   }
 
-  let hesitation = wait('Waiting for speech');
+  let hesitation = wait('Starts when you talk');
   if (has && finite(s.hesitationScore)) {
     const h = Math.round(s.hesitationScore);
     const lat = finite(s.meanLatencyMs) ? s.meanLatencyMs : null;
