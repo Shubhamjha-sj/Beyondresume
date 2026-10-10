@@ -8,8 +8,8 @@ import { ScenarioRunner } from '../src/scenario.js';
 import { SessionLog } from '../src/log.js';
 import { scoreSession } from '../src/scoring.js';
 import {
-  buildAssessment, toCredentialRecord, evidenceDigest, checkResult, shortQuote,
-  RUBRIC_ETCH, RUBRIC_META_ETCH, SCENARIO_ETCH, PASS_SCORE,
+  buildAssessment, toCredentialRecord, evidenceDigest, checkResult, shortQuote, levelOf,
+  RUBRIC_ETCH, RUBRIC_META_ETCH, SCENARIO_ETCH, PASS_SCORE, COMPETENCIES_ETCH, COMPETENCY_GROUPS, LEVELS, BADGE_ETCH,
 } from '../prototype/lib/assessment.js';
 import { SAMPLE_RUNS, SAMPLE_CANDIDATES } from '../prototype/lib/samples.js';
 
@@ -222,6 +222,8 @@ const candidateTimes = (r) => new Set(r.transcript.filter((l) => l.speaker === '
 const vias = (r) => Object.fromEntries(RUBRIC_ETCH.map((x) => [x.id, r.items[x.id].via]));
 const passed = (r) => RUBRIC_ETCH.filter((x) => r.items[x.id].passed).map((x) => x.id);
 const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
+const levels = (r) => Object.fromEntries(Object.entries(r.competencies).map(([id, x]) => [id, x.level]));
+const TECHNICAL = COMPETENCIES_ETCH.filter((x) => x.group === 'technical').map((x) => x.id);
 
 // ---------- tests ----------
 
@@ -229,7 +231,7 @@ const tests = {
   'rubric, meta and scenario constants match the contract'() {
     assert.deepEqual(RUBRIC_ETCH.map((r) => r.id), ['a1', 'a2', 'a3', 'a4', 'v1', 'v2', 'v3', 'v4']);
     assert.deepEqual([...new Set(RUBRIC_ETCH.map((r) => r.section))], ['Procedure', 'Under pressure']);
-    assert.deepEqual(RUBRIC_META_ETCH, { version: 'etch-v1', approvedBy: 'Dana Ruiz, EHS Lead', approvedOn: 'Oct 8, 2026' });
+    assert.deepEqual(RUBRIC_META_ETCH, { version: 'etch-v2', approvedBy: 'Dana Ruiz, EHS Lead', approvedOn: 'Oct 10, 2026' });
     assert.deepEqual(SCENARIO_ETCH, { id: 'etch2-pressure-fault', title: 'Etch 2 chamber pressure fault', company: 'Example Fab Co.', role: 'Equipment Technician' });
     assert.equal(PASS_SCORE, 6);
   },
@@ -425,10 +427,13 @@ const tests = {
     const { input } = exemplary();
     const result = buildAssessment(input);
     const rec = await toCredentialRecord(result);
-    assert.deepEqual(Object.keys(rec), ['issuer', 'assessment', 'scenario_id', 'company', 'rubric_version', 'rubric_approved_by', 'candidate', 'role', 'assessed_at', 'status', 'score', 'max_score', 'auto_fail', 'items', 'signals', 'evidence_digest']);
+    assert.deepEqual(Object.keys(rec), ['issuer', 'assessment', 'scenario_id', 'company', 'rubric_version', 'rubric_approved_by', 'candidate', 'role', 'assessed_at', 'status', 'score', 'max_score', 'auto_fail', 'items', 'competencies', 'signals', 'evidence_digest']);
     assert.equal(rec.issuer, 'IndustryProof');
     assert.equal(rec.assessment, 'Etch 2 chamber pressure fault');
-    assert.equal(rec.rubric_version, 'etch-v1');
+    assert.equal(rec.rubric_version, 'etch-v2');
+    // Competencies: levels only, in rubric order
+    assert.deepEqual(Object.keys(rec.competencies), COMPETENCIES_ETCH.map((x) => x.id));
+    assert.deepEqual(rec.competencies, levels(result));
     assert.equal(rec.rubric_approved_by, 'Dana Ruiz, EHS Lead');
     assert.deepEqual(rec.items, { a1: true, a2: true, a3: true, a4: true, v1: true, v2: true, v3: true, v4: true });
     assert.deepEqual(Object.keys(rec.signals), ['tone_drift', 'speech_rate_delta_pct', 'hesitation_score', 'deescalation_latency_s', 'composure']);
@@ -445,6 +450,75 @@ const tests = {
     // Null-safe on an empty result
     const empty = await toCredentialRecord(buildAssessment({ candidate: { name: 'X', assessed_at: '2026-10-10T00:00:00Z' } }));
     assert.deepEqual(empty.signals, { tone_drift: null, speech_rate_delta_pct: null, hesitation_score: null, deescalation_latency_s: null, composure: null });
+    assert.ok(Object.values(empty.competencies).every((v) => v === null));
+  },
+
+  'competency rubric: 11 ids in two groups, anchors at 1, 3 and 5, level bands'() {
+    assert.deepEqual(COMPETENCIES_ETCH.map((x) => x.id), [
+      'procedure', 'deliberate_action', 'safety_judgment', 'fab_tools', 'situational_awareness',
+      'composure', 'clarifying_questions', 'problem_solving', 'integrity', 'collaboration', 'ownership',
+    ]);
+    assert.deepEqual(COMPETENCY_GROUPS.map((g) => g.id), ['technical', 'behavioural']);
+    for (const x of COMPETENCIES_ETCH) {
+      assert.ok(COMPETENCY_GROUPS.some((g) => g.id === x.group), x.id);
+      assert.ok(x.label && x.definition && x.sources.length, x.id);
+      assert.deepEqual(Object.keys(x.anchors), ['1', '3', '5'], x.id);
+    }
+    assert.equal(COMPETENCIES_ETCH.find((x) => x.id === 'fab_tools').label, 'Working with semiconductor fab tools');
+    assert.match(COMPETENCIES_ETCH.find((x) => x.id === 'composure').note, /never affects pass or fail/);
+    assert.deepEqual(Object.keys(LEVELS), ['1', '2', '3', '4', '5']);
+    assert.deepEqual([0, 34, 35, 54, 55, 74, 75, 89, 90, 100].map(levelOf), [1, 1, 2, 2, 3, 3, 4, 4, 5, 5]);
+    assert.ok(BADGE_ETCH.name && BADGE_ETCH.description && BADGE_ETCH.criteria);
+  },
+
+  'competencies: exemplary run is 5 everywhere except questions it never asked'() {
+    const r = buildAssessment(exemplary().input);
+    assert.deepEqual(levels(r), {
+      procedure: 5, deliberate_action: 5, safety_judgment: 5, fab_tools: 5, situational_awareness: 5,
+      composure: 5, clarifying_questions: 3, problem_solving: 5, integrity: 5, collaboration: 5, ownership: 5,
+    });
+    assert.equal(r.competencies.procedure.score, 100);
+    assert.equal(r.competencies.clarifying_questions.evidence[0].text, 'Asked Sam no questions about the situation.');
+    assert.equal(r.competencies.fab_tools.evidence[0].quote, 'Chamber B is at 182, limit 120.');
+    assert.equal(r.competencies.composure.via, 'voice');
+    // Competencies never change pass/fail
+    assert.deepEqual(r.result, { status: 'pass', score: 8, max_score: 8, auto_fail: false, auto_fail_reason: null });
+  },
+
+  'competencies: unsafe shortcuts cap safety and integrity at 1'() {
+    const r = buildAssessment(unsafe().input);
+    const l = levels(r);
+    assert.equal(l.safety_judgment, 1);
+    assert.equal(l.integrity, 1);
+    assert.ok(l.deliberate_action <= 2);
+    assert.equal(l.composure, null); // no voice signals in this run: not assessed, not a 1
+    assert.equal(r.competencies.safety_judgment.evidence[0].ok, false);
+    assert.match(r.competencies.safety_judgment.evidence[0].text, /safety bypass/);
+    assert.match(r.competencies.safety_judgment.evidence.map((e) => e.text).join(' '), /ETCH-03, which is down for planned maintenance/);
+  },
+
+  'competencies: without the twin, technical ones are not assessed and voice ones still are'() {
+    const r = buildAssessment({ ...exemplary().input, fabtwin: null });
+    assert.deepEqual(checkResult(r), []);
+    for (const id of TECHNICAL) {
+      assert.equal(r.competencies[id].level, null, id);
+      assert.equal(r.competencies[id].evidence[0].text, 'No 3D twin data for this call.');
+    }
+    assert.equal(r.competencies.composure.level, 5);
+    assert.equal(r.competencies.integrity.level, 5);
+    assert.equal(r.competencies.collaboration.level, 5); // the twin-only indicators are skipped, not zeroed
+    assert.equal(r.competencies.ownership.level, null);
+    for (const r0 of [buildAssessment(), buildAssessment({})]) {
+      assert.ok(Object.values(r0.competencies).every((x) => x.level === null && x.score === null && x.evidence.length === 1));
+    }
+  },
+
+  'competencies: checkResult rejects a bad level'() {
+    const r = structuredClone(SAMPLE_CANDIDATES.jordan);
+    r.competencies.integrity.level = 6;
+    assert.deepEqual(checkResult(r), ['competencies.integrity.level is 6']);
+    delete r.competencies.ownership;
+    assert.ok(checkResult(r).some((e) => e.startsWith('competency ids are')));
   },
 
   'samples: FabTwin logs and scores are real simulation output'() {
@@ -501,6 +575,36 @@ const tests = {
     assert.equal(r.timing.pressure.detail, 'Agreed to reset and resume 5.3 s after it was suggested.');
     assert.equal(r.timing.safe.detail, 'No safe state. Etch 2 was reset instead of held, and LOT-4471 landed on it.');
     assert.equal(r.fabtwin.overall, 0);
+  },
+
+  'samples: competency levels'() {
+    // Jordan: strong all round, missed maintenance, asked no questions
+    assert.deepEqual(levels(SAMPLE_CANDIDATES.jordan), {
+      procedure: 4, deliberate_action: 5, safety_judgment: 5, fab_tools: 5, situational_awareness: 5,
+      composure: 4, clarifying_questions: 3, problem_solving: 4, integrity: 5, collaboration: 4, ownership: 5,
+    });
+    // Riley: unsafe, but asked a question and owned the reset in the report
+    assert.deepEqual(levels(SAMPLE_CANDIDATES.riley), {
+      procedure: 1, deliberate_action: 2, safety_judgment: 1, fab_tools: 1, situational_awareness: 1,
+      composure: 2, clarifying_questions: 4, problem_solving: 1, integrity: 1, collaboration: 2, ownership: 3,
+    });
+    const own = SAMPLE_CANDIDATES.riley.competencies.ownership;
+    assert.equal(own.score, 85); // capped at 3 by the broken maintenance promise
+    assert.equal(own.evidence[0].text, 'Broke a spoken commitment, so this is capped at Proficient.');
+    assert.deepEqual(SAMPLE_CANDIDATES.riley.competencies.clarifying_questions.evidence[0], {
+      ok: true, text: 'Asked a question about the situation', t: 43.5, quote: 'Which one is Etch 2?',
+    });
+  },
+
+  'samples: every competency evidence time is a transcript line or a 3D log entry'() {
+    for (const [id, r] of Object.entries(SAMPLE_CANDIDATES)) {
+      const run = SAMPLE_RUNS[id];
+      const times = new Set(r.transcript.map((l) => l.t));
+      for (const e of run.fabtwin.log.entries) times.add(Math.round((e.t + run.scenarioOffsetSec) * 10) / 10);
+      for (const [cid, x] of Object.entries(r.competencies)) {
+        for (const e of x.evidence) if (e.t !== null) assert.ok(times.has(e.t), `${id}.${cid} "${e.text}" t=${e.t}`);
+      }
+    }
   },
 
   async 'samples: credential records build in the contract order'() {

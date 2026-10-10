@@ -13,7 +13,7 @@ export const SCENARIO_ETCH = {
   role: 'Equipment Technician',
 };
 
-export const RUBRIC_META_ETCH = { version: 'etch-v1', approvedBy: 'Dana Ruiz, EHS Lead', approvedOn: 'Oct 8, 2026' };
+export const RUBRIC_META_ETCH = { version: 'etch-v2', approvedBy: 'Dana Ruiz, EHS Lead', approvedOn: 'Oct 10, 2026' };
 
 export const RUBRIC_ETCH = [
   { id: 'a1', section: 'Procedure', label: 'Checked the Etch 2 control screen' },
@@ -28,6 +28,135 @@ export const RUBRIC_ETCH = [
 
 export const MAX_SCORE = RUBRIC_ETCH.length;
 export const PASS_SCORE = 6;
+
+// Competency profile: 1-5 levels scored from the same evidence as the checks. Descriptive only:
+// pass/fail is still the 8 checks plus the auto-fail rule. A level is null when its data is missing.
+export const LEVELS = { 1: 'Not yet', 2: 'Developing', 3: 'Proficient', 4: 'Strong', 5: 'Exemplary' };
+export const COMPETENCY_GROUPS = [
+  { id: 'technical', label: 'Technical' },
+  { id: 'behavioural', label: 'Behavioural' },
+];
+
+export const COMPETENCIES_ETCH = [
+  {
+    id: 'procedure', group: 'technical', label: 'Following procedure',
+    definition: 'Carried out the site’s fault-response steps completely and within their time targets.',
+    anchors: {
+      1: 'Missed most of the response steps.',
+      3: 'Did the core steps (check, hold, reroute) but missed or delayed others.',
+      5: 'Checked, acknowledged, held, rerouted, called maintenance and reported, all on time.',
+    },
+    sources: ['3D actions'],
+  },
+  {
+    id: 'deliberate_action', group: 'technical', label: 'Deliberate action',
+    definition: 'Knew which actions to take and took them on purpose: read the tool first, with no guessing, trial and error or stray actions.',
+    anchors: {
+      1: 'Acted before reading the tool, or tried actions that didn’t fit the fault.',
+      3: 'Mostly purposeful, with a stray action or a slow step from diagnosis to action.',
+      5: 'Read the tool, then went straight to the right actions on the right tool.',
+    },
+    sources: ['3D actions'],
+  },
+  {
+    id: 'safety_judgment', group: 'technical', label: 'Safety judgment',
+    definition: 'Protected people, tools and wafers: no bypassed alarms, no needless emergency stops, no product sent into a faulted or down tool.',
+    anchors: {
+      1: 'Bypassed the alarm, pressed the EMO with nobody in danger, or let product into the faulted tool.',
+      3: 'Avoided the worst outcomes but left a risk open, such as a tool never put on hold.',
+      5: 'Made the faulted tool safe and kept all product away from it, with no bypass.',
+    },
+    sources: ['3D actions'],
+  },
+  {
+    id: 'fab_tools', group: 'technical', label: 'Working with semiconductor fab tools',
+    definition: 'Read the tool correctly and used the right controls: the alarm details, hold versus reset versus EMO, which etcher could take the lot, and the operator terminal.',
+    anchors: {
+      1: 'Couldn’t read the alarm, or used the wrong controls.',
+      3: 'Read the alarm and used some of the right controls.',
+      5: 'Read out the reading, limit and code, used Hold, picked the healthy etcher and used the terminal.',
+    },
+    sources: ['3D actions', 'Transcript'],
+  },
+  {
+    id: 'situational_awareness', group: 'technical', label: 'Situational awareness',
+    definition: 'Noticed the alarm quickly, made the tool safe in time and kept track of the lot heading for it.',
+    anchors: {
+      1: 'Slow to respond, and the lot reached the faulted tool.',
+      3: 'Responded, but reached a safe state late or lost track of the lot.',
+      5: 'At the tool within 15 s and safe within 30 s, with the lot on a healthy tool.',
+    },
+    sources: ['3D actions'],
+  },
+  {
+    id: 'composure', group: 'behavioural', label: 'Composure under pressure',
+    definition: 'Stayed calm and steady when pushed: tone, pace and pauses held up under pressure.',
+    note: 'Voice-based. Voice varies with accent, language and nerves, so this never affects pass or fail.',
+    anchors: {
+      1: 'Tone and pace changed sharply, with long pauses under pressure.',
+      3: 'Some strain under pressure, but kept going.',
+      5: 'Tone, pace and response time stayed steady under pressure.',
+    },
+    sources: ['Voice signals'],
+  },
+  {
+    id: 'clarifying_questions', group: 'behavioural', label: 'Asking clarifying questions',
+    definition: 'Gathered information before deciding: asked relevant questions and checked the tool screen and terminal instead of assuming.',
+    anchors: {
+      1: 'Decided without checking or asking.',
+      3: 'Checked the tool and terminal before deciding, but asked nothing.',
+      5: 'Asked relevant questions and checked the tool and terminal before deciding.',
+    },
+    sources: ['Transcript', '3D actions'],
+  },
+  {
+    id: 'problem_solving', group: 'behavioural', label: 'Problem solving',
+    definition: 'Found a fix that met both goals (a safe tool and a moving line), explained why, and dealt with the root cause.',
+    anchors: {
+      1: 'Didn’t contain the fault or find a way to keep the lot moving.',
+      3: 'Contained the fault or kept the lot moving, but not both.',
+      5: 'Held the tool, moved the lot to the healthy etcher, explained why and raised maintenance.',
+    },
+    sources: ['3D actions', 'Transcript'],
+  },
+  {
+    id: 'integrity', group: 'behavioural', label: 'Integrity under pressure',
+    definition: 'Held a safe position when the shift lead pushed for shortcuts, firmly and respectfully, and offered a way forward.',
+    anchors: {
+      1: 'Agreed to or took the unsafe shortcut.',
+      3: 'Refused one push but gave way or wavered on the other.',
+      5: 'Refused both pushes, acknowledged the pressure and offered a safe alternative.',
+    },
+    sources: ['Transcript', 'Sam’s logs', '3D actions'],
+  },
+  {
+    id: 'collaboration', group: 'behavioural', label: 'Collaboration and communication',
+    definition: 'Kept the shift lead and maintenance informed, acknowledged their concerns and gave a clear, complete shift report.',
+    anchors: {
+      1: 'Said little, and the shift report was missing or unclear.',
+      3: 'Kept people partly informed; the report missed key facts.',
+      5: 'Gave updates as they went, used the formal channels and covered fault, tool state, lot and maintenance in the report.',
+    },
+    sources: ['Transcript', '3D actions'],
+  },
+  {
+    id: 'ownership', group: 'behavioural', label: 'Ownership and follow-through',
+    definition: 'Did what they said they would and reported what happened honestly, including their own mistakes.',
+    anchors: {
+      1: 'Promises weren’t kept, and mistakes were left out of the report.',
+      3: 'Kept most promises but missed one, or the report was incomplete.',
+      5: 'Every spoken promise was carried out, and the report was complete and honest.',
+    },
+    sources: ['Transcript', '3D actions'],
+  },
+];
+
+// The badge a passing candidate can share (docs/INTEGRATION.md, "Badge").
+export const BADGE_ETCH = {
+  name: 'Etch Tool Fault Response',
+  description: 'Handled a live chamber-pressure fault on a plasma etch tool in a 3D replica of a fab bay while the shift lead pushed for unsafe shortcuts.',
+  criteria: 'Passed the Etch 2 chamber pressure fault assessment: at least 6 of 8 checks and no safety bypass.',
+};
 
 // Actions Sam can log as verbal commitments (log_verbal_commitment), with short UI labels.
 export const ACTION_LABELS = {
@@ -45,8 +174,13 @@ const COMMIT_ACTIONS = Object.keys(ACTION_LABELS);
 const FOCUS = 'ETCH-02'; // the faulted tool
 const SPARE = 'ETCH-01'; // the only healthy etcher (ETCH-03 is down for PM)
 const HOT_LOT = 'LOT-4471';
+const PM_TOOL = 'ETCH-03'; // down for planned maintenance
 const STANCES = ['refused', 'complied', 'unclear'];
-const RESULT_KEYS = ['candidate', 'scenario', 'result', 'items', 'timing', 'signals', 'saidVsDid', 'transcript', 'fabtwin'];
+const RESULT_KEYS = ['candidate', 'scenario', 'result', 'items', 'competencies', 'timing', 'signals', 'saidVsDid', 'transcript', 'fabtwin'];
+// Time targets in s after the alarm, from scenarios/etch2-pressure-fault.json expect[].within.
+const WITHIN = { inspect: 60, ack: 90, hold: 120, reroute: 78, maint: 180, notify: 240 };
+const LOT_ETA = 90; // LOT-4471 reaches Etch 2 this long after the alarm unless it is rerouted
+const TERMINAL_ACTIONS = ['reroute', 'notify_supervisor', 'call_maintenance'];
 
 // ---------- result ----------
 
@@ -90,6 +224,8 @@ export function buildAssessment({
   const reset = first((a) => a.action === 'reset_resume' && a.tool === FOCUS);
   const emo = first((a) => a.action === 'emo');
   const notify = first((a) => a.action === 'notify_supervisor' && reportFacts(a.text) >= 1 && afterAlarm(a));
+  const notifyAny = first((a) => a.action === 'notify_supervisor' && afterAlarm(a));
+  const ack = first((a) => a.action === 'ack_alarm' && a.tool === FOCUS && afterAlarm(a));
   const lot = log ? lotOutcome(log) : null;
   const late = (id) => (log?.expectations[id]?.done && !log.expectations[id].onTime ? ' (late)' : '');
 
@@ -194,6 +330,10 @@ export function buildAssessment({
   const pressureValue = s1?.stance === 'refused' && !reset && p1.markT != null && p1.firstRefusal
     ? r1(Math.max(0, p1.firstRefusal.t - p1.markT)) : null;
   const sig = readSignals(signals, pressureValue);
+  const competencies = scoreCompetencies({
+    log, lines, items, inspect, ack, hold, reroute, wrongReroute, maint, wrongMaint, reset, emo, notify, notifyAny,
+    lot, p1, p2, wrap, saidVsDid, sig, ct, rel, afterAlarm,
+  });
   const timing = {
     pressure: { value: pressureValue, label: 'Pressure line to refusal', detail: pressureDetail(p1, p2, reset) },
     safe: { value: safeValue(twin), label: 'Alarm to safe state (hold + reroute)', detail: safeDetail(log, { hold, reroute, reset, lot }) },
@@ -218,6 +358,7 @@ export function buildAssessment({
       auto_fail_reason: autoFail ? reasons.join(' ') : null,
     },
     items,
+    competencies,
     timing,
     signals: sig,
     saidVsDid,
@@ -248,6 +389,7 @@ export async function toCredentialRecord(result, { issuer = 'IndustryProof' } = 
     max_score: result.result?.max_score ?? MAX_SCORE,
     auto_fail: !!result.result?.auto_fail,
     items,
+    competencies: Object.fromEntries(COMPETENCIES_ETCH.map((c) => [c.id, levelOrNull(result.competencies?.[c.id]?.level)])),
     signals: {
       tone_drift: round(s.toneDrift, 2),
       speech_rate_delta_pct: round(s.speechRateDeltaPct, 1),
@@ -280,6 +422,24 @@ export function checkResult(result) {
     if (typeof it.evidence !== 'string' || !it.evidence) errs.push(`items.${r.id}.evidence is empty`);
     if (it.t !== null && typeof it.t !== 'number') errs.push(`items.${r.id}.t is not a number or null`);
     if (!['action', 'voice', 'both'].includes(it.via)) errs.push(`items.${r.id}.via is ${it.via}`);
+  }
+  const comps = result.competencies;
+  if (!comps || typeof comps !== 'object') errs.push('competencies is not an object');
+  else {
+    const ids = Object.keys(comps).join(',');
+    if (ids !== COMPETENCIES_ETCH.map((c) => c.id).join(',')) errs.push(`competency ids are ${ids}`);
+    for (const c of COMPETENCIES_ETCH) {
+      const x = comps[c.id];
+      if (!x) continue;
+      if (x.level !== levelOrNull(x.level)) errs.push(`competencies.${c.id}.level is ${x.level}`);
+      if (x.score !== null && !(Number.isInteger(x.score) && x.score >= 0 && x.score <= 100)) errs.push(`competencies.${c.id}.score is ${x.score}`);
+      if ((x.level === null) !== (x.score === null)) errs.push(`competencies.${c.id} has a level without a score or the reverse`);
+      if (!['action', 'voice', 'both'].includes(x.via)) errs.push(`competencies.${c.id}.via is ${x.via}`);
+      if (!Array.isArray(x.evidence) || !x.evidence.length) errs.push(`competencies.${c.id}.evidence is empty`);
+      else if (x.evidence.some((e) => typeof e.text !== 'string' || !e.text || (e.t !== null && typeof e.t !== 'number') || ![true, false, null].includes(e.ok))) {
+        errs.push(`competencies.${c.id}.evidence has a bad entry`);
+      }
+    }
   }
   const score = RUBRIC_ETCH.filter((r) => result.items?.[r.id]?.passed).length;
   if (result.result?.score !== score) errs.push(`result.score ${result.result?.score} != ${score} passed items`);
@@ -333,6 +493,9 @@ function readTwin(fabtwin, offset) {
     hasLog: entries.length > 0,
     score,
     actions: entries.filter((e) => e.type === 'action' && e.ok !== false),
+    failed: entries.filter((e) => e.type === 'action' && e.ok === false),
+    zones: entries.filter((e) => e.type === 'zone'),
+    ui: entries.filter((e) => e.type === 'ui'),
     events,
     expectations: Object.fromEntries(arr(score?.expectations).map((x) => [x.id, x])),
     alarmT,
@@ -547,6 +710,362 @@ function reportFacts(text) {
   ].filter((re) => re.test(s)).length;
 }
 
+// ---------- competencies ----------
+
+// Each competency adds up weighted indicators to a 0-100 score and bands it into a level
+// (levelOf). Indicators whose data is missing are skipped and the rest renormalised; caps for
+// unsafe actions apply after banding. Every indicator is listed as evidence, so a reviewer can
+// see why a level came out as it did.
+const ALARM_FACTS = [/\b(chamber|pressure)\b/, /\b182\b/, /\b120\b/, /\be ?4102\b/];
+const REASONING = /\b(because|since|over (the |a |its )?limit|scrap\w*|unsafe|not safe|isnt safe|only option|down for (pm|maintenance))\b/;
+const PRESSURE_ACK = /\b(i get (that|it)|i understand|i hear you|i know|understood|sorry)\b/;
+const WAY_FORWARD = /\b(instead|can take it|etch (1|one|01)|ill|i will|im (putting|moving|calling|sending|keeping)|lets)\b/;
+const RAPPORT = /\b(i get (that|it)|i understand|i hear you|understood|got it|thanks|thank you|will do|on it|copy that|morning|sounds good)\b/;
+const STATE_CHANGES = ['hold_tool', 'reset_resume', 'call_maintenance', 'emo'];
+
+export function levelOf(score) {
+  return score >= 90 ? 5 : score >= 75 ? 4 : score >= 55 ? 3 : score >= 35 ? 2 : 1;
+}
+
+function scoreCompetencies(x) {
+  const { log, lines, items, inspect, ack, hold, reroute, wrongReroute, maint, wrongMaint, reset, emo, notify, notifyAny,
+    lot, p1, p2, wrap, saidVsDid, sig, ct, rel, afterAlarm } = x;
+  const cand = lines.filter((l) => l.speaker === 'candidate');
+  const NO_LOG = 'No 3D twin data for this call';
+  const NO_SPEECH = 'The candidate didn’t speak during this call';
+  const at = (a) => (a ? ct(a.t) : null);
+  const c = {};
+
+  // Shared reads of the 3D log
+  let arrivals = [];
+  let pmMove = null;
+  let terminalAfterAlarm = null;
+  let terminalEver = null;
+  if (log) {
+    arrivals = [log.zones.find((z) => z.enter && z.tool === FOCUS && afterAlarm(z)), inspect].filter(Boolean);
+    pmMove = log.actions.find((a) => a.action === 'reroute' && a.to === PM_TOOL) || null;
+    const usesTerminal = (a) => TERMINAL_ACTIONS.includes(a.action) || a.source === 'dashboard';
+    terminalAfterAlarm = log.ui.find((u) => u.name === 'dashboard_open' && afterAlarm(u)) ||
+      log.actions.find((a) => usesTerminal(a) && afterAlarm(a)) || null;
+    terminalEver = log.ui.find((u) => u.name === 'dashboard_open') || log.actions.find(usesTerminal) || null;
+  }
+
+  // ----- Technical -----
+  if (!log) {
+    for (const id of ['procedure', 'deliberate_action', 'safety_judgment', 'fab_tools', 'situational_awareness']) c[id] = unrated('action', NO_LOG);
+  } else {
+    const since = (a) => (log.alarmT === null ? null : Math.round(a.t - log.alarmT));
+    const step = (hit, w, within, did, missing) => {
+      if (!hit) return pt(w, 0, missing);
+      const d = since(hit);
+      const onTime = d === null || d <= within;
+      return pt(w, onTime ? w : w / 2, `${did} ${rel(hit.t)}${onTime ? '' : `, after the ${within} s target`}`, at(hit), onTime);
+    };
+    c.procedure = rate('action', [
+      step(inspect, 15, WITHIN.inspect, 'Checked the Etch 2 control screen', 'Never checked the Etch 2 control screen'),
+      step(ack, 10, WITHIN.ack, 'Acknowledged the alarm at the tool', 'Never acknowledged the alarm at the tool'),
+      step(hold, 20, WITHIN.hold, 'Put Etch 2 on hold', 'Never put Etch 2 on hold'),
+      step(reroute, 25, WITHIN.reroute, `Rerouted ${HOT_LOT} to ${SPARE}`, `Never rerouted ${HOT_LOT} to ${SPARE}`),
+      step(maint, 20, WITHIN.maint, 'Called maintenance for Etch 2', 'Never called maintenance for Etch 2'),
+      step(notifyAny, 10, WITHIN.notify, 'Sent the supervisor an update', 'Never sent the supervisor an update'),
+    ]);
+
+    // Deliberate action: diagnose first, act on the right target, no stray or failed tries, no detours.
+    const firstChange = log.actions.find((a) => STATE_CHANGES.includes(a.action) && (a.tool === FOCUS || a.action === 'emo') && afterAlarm(a)) || null;
+    const diagnose = firstChange && (!inspect || firstChange.t < inspect.t)
+      ? pt(25, 0, `${didText(firstChange)} ${rel(firstChange.t)}, before checking its screen`, at(firstChange))
+      : inspect ? pt(25, 25, `Checked the Etch 2 screen ${rel(inspect.t)}${firstChange ? ', before changing anything' : ''}`, at(inspect))
+      : pt(25, 0, 'Never checked the Etch 2 screen');
+    let movedLot = false;
+    const judged = log.actions.filter((a) => a.action !== 'inspect' && a.action !== 'end_shift');
+    const purposeful = judged.map((a) => {
+      if (!afterAlarm(a)) return false;
+      if (['ack_alarm', 'hold_tool', 'call_maintenance'].includes(a.action)) return a.tool === FOCUS;
+      if (a.action === 'notify_supervisor') return true;
+      if (a.action === 'reroute' && a.lot === HOT_LOT && a.to === SPARE && !movedLot) return (movedLot = true);
+      return false;
+    });
+    const failedTries = log.failed.filter((a) => a.action !== 'inspect' && a.action !== 'end_shift');
+    const total = judged.length + failedTries.length;
+    const good = purposeful.filter(Boolean).length;
+    const precision = total
+      ? pt(35, (35 * good) / total, good === total ? `All ${total} actions were the right action on the right tool` : `${good} of ${total} actions were the right action on the right tool`, null, good === total)
+      : pt(35, 0, 'Took no actions on the tools');
+    const stray = judged.filter((_, i) => !purposeful[i]).map((a) => pt(0, 0, `Stray action: ${didText(a)} ${rel(a.t)}`, at(a), false))
+      .concat(failedTries.map((a) => pt(0, 0, `Tried: ${didText(a)} ${rel(a.t)}, which didn’t go through`, at(a), false)))
+      .slice(0, 3);
+    const gap = hold && inspect && hold.t >= inspect.t ? Math.round(hold.t - inspect.t) : null;
+    const decisive = gap !== null
+      ? pt(25, gap <= 30 ? 25 : gap <= 60 ? 12 : 0, `Put Etch 2 on hold ${gap} s after reading its screen`, at(hold), gap <= 30)
+      : pt(25, 0, hold ? 'Put Etch 2 on hold without reading its screen first' : 'Never got from diagnosis to a hold');
+    let route;
+    if (log.alarmT === null) route = skip('Route to Etch 2: no alarm in this run');
+    else if (!arrivals.length) route = pt(15, 0, 'Never went to Etch 2 after the alarm');
+    else {
+      const t = Math.min(...arrivals.map((a) => a.t));
+      const detours = [...new Set(log.zones.filter((z) => z.enter && z.tool !== FOCUS && z.t >= log.alarmT && z.t < t).map((z) => z.tool))];
+      route = detours.length
+        ? pt(15, 0, `Stopped at ${detours.join(', ')} on the way to Etch 2`, ct(t))
+        : pt(15, 15, 'Went straight to Etch 2 after the alarm', ct(t));
+    }
+    c.deliberate_action = rate('action', [diagnose, precision, ...stray, decisive, route],
+      reset || emo ? [cap(2, 'Took an unsafe action, so this is capped at Developing', at(reset || emo))] : []);
+
+    // Safety judgment
+    const healthyHolds = log.actions.filter((a) => a.action === 'hold_tool' && a.tool !== FOCUS);
+    const safetyCaps = [];
+    if (reset) safetyCaps.push(cap(1, `Reset Etch 2 and resumed it ${rel(reset.t)} without maintenance: a safety bypass`, at(reset)));
+    if (emo) safetyCaps.push(cap(1, `Pressed the EMO ${rel(emo.t)} when nobody was in danger`, at(emo)));
+    c.safety_judgment = rate('action', [
+      hold ? pt(30, 30, `Put Etch 2 on hold ${rel(hold.t)}`, at(hold)) : pt(30, 0, 'Etch 2 was never put on hold'),
+      lot.delivered ? pt(40, 0, `${HOT_LOT} landed on the faulted Etch 2 ${rel(lot.arrived.t)}`, at(lot.arrived))
+        : lot.keptOff ? pt(40, 40, `Kept ${HOT_LOT} off the faulted tool`, at(lot.arrived || lot.lastMove))
+        : pt(40, 20, `${HOT_LOT} was still headed to Etch 2 when the shift ended`, null, false),
+      pmMove ? pt(30, 0, `Sent ${pmMove.lot} to ${PM_TOOL}, which is down for planned maintenance`, at(pmMove))
+        : pt(30, 30, `Sent nothing to ${PM_TOOL}, which is down for maintenance`),
+      healthyHolds.length ? pt(10, 0, `Put a healthy tool on hold: ${[...new Set(healthyHolds.map((a) => a.tool))].join(', ')}`, at(healthyHolds[0]))
+        : pt(10, 10, 'Held only the faulted tool'),
+      ...(!reset && !emo ? [pt(0, 0, 'No alarm bypass and no needless EMO', null, true)] : []),
+    ], safetyCaps);
+
+    // Working with fab tools: read the alarm, use the right control, pick the right spare, use the terminal.
+    const sources = cand.map((l) => ({ text: l.text, t: l.t, said: true }))
+      .concat(log.actions.filter((a) => a.action === 'notify_supervisor' && a.text).map((a) => ({ text: a.text, t: ct(a.t), said: false })));
+    let best = null;
+    let bestN = 0;
+    for (const s of sources) {
+      for (const sentence of sentencesOf(s.text)) {
+        const n = ALARM_FACTS.filter((re) => re.test(words(sentence))).length;
+        if (n > bestN) { best = { ...s, q: sentence }; bestN = n; }
+      }
+    }
+    c.fab_tools = rate('both', [
+      !best ? pt(30, 0, 'Never described the alarm reading')
+        : pt(30, bestN >= 2 ? 30 : 15, `${best.said ? 'Read out' : 'Wrote down'} ${bestN} of 4 alarm details (chamber, reading, limit, code)`, best.t, bestN >= 2, best.q),
+      hold && !reset && !emo ? pt(25, 25, 'Used Hold on Etch 2, not reset or the EMO', at(hold))
+        : hold ? pt(25, 12, `Used Hold on Etch 2, but also ${reset ? 'reset it' : 'pressed the EMO'}`, at(hold), false)
+        : reset ? pt(25, 0, 'Used Reset and resume instead of Hold', at(reset))
+        : emo ? pt(25, 0, 'Used the EMO instead of Hold', at(emo))
+        : pt(25, 0, 'Never used Hold on Etch 2'),
+      reroute && !wrongReroute ? pt(25, 25, `Chose ${SPARE}, the only healthy etcher, for ${HOT_LOT}`, at(reroute))
+        : reroute ? pt(25, 15, `Ended on ${SPARE} for ${HOT_LOT}, after first sending it to ${wrongReroute.to}`, at(reroute), false)
+        : wrongReroute ? pt(25, 0, `Sent ${HOT_LOT} to ${wrongReroute.to} instead of ${SPARE}`, at(wrongReroute))
+        : pt(25, 0, `Never moved ${HOT_LOT} to a healthy etcher`),
+      terminalEver ? pt(10, 10, 'Used the operator terminal', at(terminalEver)) : pt(10, 0, 'Never used the operator terminal'),
+      maint ? pt(10, 10, 'Raised maintenance on the right tool', at(maint))
+        : wrongMaint ? pt(10, 0, `Raised maintenance on ${wrongMaint.tool}, not Etch 2`, at(wrongMaint))
+        : pt(10, 0, 'Never raised maintenance'),
+    ]);
+
+    // Situational awareness: reaction time, time to a safe state, and where the lot ended up.
+    if (log.alarmT === null) c.situational_awareness = unrated('action', 'No alarm was raised in this run');
+    else {
+      const arrive = arrivals.length ? Math.min(...arrivals.map((a) => a.t)) : null;
+      const react = arrive === null ? null : Math.round(arrive - log.alarmT);
+      const lotEvent = log.events.find((e) => e.name === 'lot' && e.lot === HOT_LOT);
+      const eta = lotEvent && Number.isFinite(lotEvent.eta) ? lotEvent.t + lotEvent.eta - log.alarmT : LOT_ETA;
+      const safeAt = hold && reroute ? Math.max(hold.t, reroute.t) : null;
+      const safeT = safeAt === null ? null : Math.round(safeAt - log.alarmT);
+      c.situational_awareness = rate('action', [
+        react === null ? pt(30, 0, 'Never reached Etch 2 after the alarm')
+          : pt(30, react <= 15 ? 30 : react <= 30 ? 22 : react <= 60 ? 12 : 0, `Reached Etch 2 ${react} s after the alarm`, ct(arrive), react <= 30),
+        safeT === null ? pt(40, 0, hold ? `Never rerouted ${HOT_LOT}, so no safe state` : 'Never put Etch 2 on hold, so no safe state')
+          : pt(40, safeT <= 30 ? 40 : safeT <= 60 ? 30 : safeT <= eta ? 20 : 0, `Safe state (hold and reroute) ${safeT} s after the alarm`, ct(safeAt), safeT <= 60),
+        lot.keptOff && lot.dest === SPARE ? pt(30, 30, `Kept track of ${HOT_LOT}: it ended on ${SPARE}`, at(lot.arrived || lot.lastMove))
+          : lot.keptOff ? pt(30, 10, `Moved ${HOT_LOT} off Etch 2, but to ${lot.dest}`, at(lot.lastMove), false)
+          : lot.delivered ? pt(30, 0, `${HOT_LOT} landed on Etch 2 ${rel(lot.arrived.t)}`, at(lot.arrived))
+          : pt(30, 0, `${HOT_LOT} was still headed to Etch 2 when the shift ended`),
+      ]);
+    }
+  }
+
+  // ----- Behavioural -----
+  const composure = num(sig.composure);
+  if (composure === null) c.composure = unrated('voice', 'Voice signals weren’t measured in this call');
+  else {
+    const score = clamp(Math.round(composure), 0, 100);
+    const detail = [];
+    const drift = num(sig.toneDrift);
+    if (drift !== null) {
+      detail.push(drift < 25 ? pt(0, 0, `Tone stayed steady under pressure (drift ${Math.round(drift)}/100)`, null, true)
+        : pt(0, 0, `Tone shifted under pressure (drift ${Math.round(drift)}/100${sig.toneDirection ? `, ${sig.toneDirection}` : ''})`, null, false));
+    }
+    const hes = num(sig.hesitationScore);
+    if (hes !== null) {
+      detail.push(pt(0, 0, hes >= 70 ? `Answered without much hesitation (${Math.round(hes)}/100)` : `Hesitant answers (${Math.round(hes)}/100, higher is steadier)`, null, hes >= 70));
+    }
+    const pace = num(sig.speechRateDeltaPct);
+    if (pace !== null) {
+      const p = `${pace > 0 ? '+' : pace < 0 ? '−' : ''}${Math.abs(Math.round(pace))}%`;
+      detail.push(pt(0, 0, Math.abs(pace) <= 10 ? `Kept a normal pace under pressure (${p})` : `Pace changed under pressure (${p})`, null, Math.abs(pace) <= 10));
+    }
+    const deesc = num(sig.deescalationLatencyS);
+    if (deesc !== null) detail.push(pt(0, 0, `Pushed back ${deesc.toFixed(1)} s after the shortcut was suggested`, null, deesc <= 4));
+    c.composure = rate('voice', [pt(100, score, `Composure ${score}/100 from tone, pace, pauses and how fast they pushed back`, null, score >= 55), ...detail],
+      log && emo ? [cap(2, 'Pressed the EMO, a panic response', at(emo))] : []);
+  }
+
+  if (!log) c.clarifying_questions = unrated('both', NO_LOG);
+  else {
+    const qs = [];
+    for (const l of cand) {
+      for (const s of sentencesOf(l.text)) if (s.endsWith('?') && words(s).split(' ').length >= 3) qs.push({ q: s, t: l.t });
+    }
+    const ans = p1.final;
+    c.clarifying_questions = rate('both', [
+      qs.length ? pt(35, qs.length >= 2 ? 35 : 20, qs.length >= 2 ? `Asked ${qs.length} questions about the situation` : 'Asked a question about the situation', qs[0].t, true, qs[0].q)
+        : pt(35, 0, 'Asked Sam no questions about the situation'),
+      ...qs.slice(1, 3).map((q) => pt(0, 0, 'Also asked', q.t, true, q.q)),
+      !inspect ? pt(35, 0, 'Never checked the Etch 2 screen')
+        : ans && ans.t !== null && ans.t < ct(inspect.t) ? pt(35, 0, 'Answered the reset push before checking the Etch 2 screen', ans.t)
+        : pt(35, 35, ans ? 'Checked the Etch 2 screen before answering the reset push' : `Checked the Etch 2 screen ${rel(inspect.t)}`, at(inspect)),
+      terminalAfterAlarm ? pt(30, 30, `Checked the operator terminal ${rel(terminalAfterAlarm.t)}`, at(terminalAfterAlarm))
+        : pt(30, 0, 'Never opened the operator terminal after the alarm'),
+    ]);
+  }
+
+  if (!log) c.problem_solving = unrated('both', NO_LOG);
+  else {
+    const why = findSentence(cand, REASONING);
+    const saidMaint = saidVsDid.find((r) => r.action === 'call_maintenance' && r.said && !r.did);
+    c.problem_solving = rate('both', [
+      hold && !reset ? pt(25, 25, `Contained the fault: put Etch 2 on hold ${rel(hold.t)}`, at(hold))
+        : reset ? pt(25, 0, 'Reset the tool instead of containing the fault', at(reset))
+        : emo ? pt(25, 0, 'Shut the tool down with the EMO instead of containing the fault', at(emo))
+        : pt(25, 0, 'Never contained the fault'),
+      reroute ? pt(30, 30, `Kept the line moving: sent ${HOT_LOT} to ${SPARE}`, at(reroute))
+        : wrongReroute ? pt(30, 0, `Sent ${HOT_LOT} to ${wrongReroute.to}, which can’t run it`, at(wrongReroute))
+        : pt(30, 0, `Found no way to keep ${HOT_LOT} moving`),
+      why ? pt(20, 20, 'Explained their reasoning', why.t, true, why.q) : pt(20, 0, 'Never explained the reasoning behind their decisions'),
+      maint ? pt(25, 25, `Raised maintenance for the root cause ${rel(maint.t)}`, at(maint))
+        : saidMaint ? pt(25, 0, 'Said they would get maintenance but never raised it', saidMaint.said.t, false, saidMaint.said.quote)
+        : pt(25, 0, 'Never raised maintenance for the root cause'),
+    ]);
+  }
+
+  if (p1.markT === null && p2.markT === null) c.integrity = unrated('both', 'Sam’s pressure lines weren’t delivered in this call');
+  else {
+    const s1 = p1.final;
+    const s2 = p2.final;
+    const parts = [];
+    if (p1.markT !== null) {
+      parts.push(reset ? pt(40, 0, `Reset and resumed Etch 2 when pushed, ${rel(reset.t)}`, at(reset))
+        : s1?.stance === 'refused' ? pt(40, 40, 'Refused the “reset and resume” shortcut', s1.t, true, s1.quote)
+        : s1?.stance === 'unclear' ? pt(40, 15, 'Gave no clear answer to the reset push', s1.t, false, s1.quote)
+        : s1?.stance === 'complied' ? pt(40, 0, 'Agreed to the reset shortcut', s1.t, false, s1.quote)
+        : pt(40, 0, 'No answer to the reset push'));
+    }
+    if (p2.markT !== null) {
+      parts.push(items.v2.passed ? pt(35, 35, `Held firm on ${HOT_LOT}: kept it off the faulted tool`, items.v2.t, true, s2?.stance === 'refused' ? s2.quote : null)
+        : s2?.stance === 'unclear' ? pt(35, 15, 'Gave no clear answer to the hot-lot push', s2.t, false, s2.quote)
+        : s2?.stance === 'complied' ? pt(35, 0, `Agreed to run ${HOT_LOT} on the faulted tool`, s2.t, false, s2.quote)
+        : pt(35, 0, items.v2.evidence, items.v2.t, false));
+    }
+    const resisted = [];
+    if (p1.markT !== null && !reset && s1?.stance === 'refused') resisted.push(p1.markT);
+    if (p2.markT !== null && items.v2.passed) resisted.push(p2.markT);
+    if (!resisted.length) parts.push(pt(25, 0, 'Never pushed back, so there was no refusal to frame'));
+    else {
+      const answers = cand.filter((l) => resisted.some((m) => l.t >= m - 0.5 && l.t <= m + 20));
+      const ackS = findSentence(answers, PRESSURE_ACK);
+      const fwdS = findSentence(answers, WAY_FORWARD);
+      parts.push(ackS ? pt(10, 10, 'Acknowledged the pressure', ackS.t, true, ackS.q) : pt(10, 0, 'Pushed back without acknowledging the pressure'));
+      parts.push(fwdS ? pt(15, 15, 'Offered a safe way forward', fwdS.t, true, fwdS.q) : pt(15, 0, 'Said no without offering another way'));
+    }
+    c.integrity = rate('both', parts, reset ? [cap(1, 'Took the unsafe shortcut', at(reset))] : []);
+  }
+
+  if (!cand.length) c.collaboration = unrated('both', NO_SPEECH);
+  else {
+    const n = wrap ? reportFacts(wrap.text) : 0;
+    const announced = saidVsDid.filter((r) => r.said).length;
+    const rapport = findSentence(cand, RAPPORT);
+    c.collaboration = rate('both', [
+      wrap ? pt(30, [0, 7, 15, 22, 30][n], `Shift report covered ${n} of 4 key facts (fault, tool state, lot, maintenance)`, wrap.t, n >= 3, shortQuote(wrap.text))
+        : pt(30, 0, 'Gave no shift report'),
+      pt(20, announced >= 3 ? 20 : announced ? 10 : 0, announced ? `Told Sam what they were doing ${announced} time${announced > 1 ? 's' : ''}` : 'Didn’t tell Sam what they were doing', null, announced >= 3),
+      !log ? skip('Written update: no 3D twin data')
+        : notify ? pt(15, 15, `Sent the supervisor a written update ${rel(notify.t)}`, at(notify)) : pt(15, 0, 'Sent no written update on the terminal'),
+      !log ? skip('Maintenance: no 3D twin data')
+        : maint ? pt(15, 15, `Brought in maintenance ${rel(maint.t)}`, at(maint)) : pt(15, 0, 'Didn’t bring in maintenance'),
+      rapport ? pt(20, 20, 'Engaged with Sam', rapport.t, true, rapport.q) : pt(20, 0, 'Never acknowledged Sam or his concerns'),
+    ]);
+  }
+
+  if (!log || !cand.length) c.ownership = unrated('both', !log ? NO_LOG : NO_SPEECH);
+  else {
+    const said = saidVsDid.filter((r) => r.said);
+    const broken = said.filter((r) => !r.did);
+    const mistakes = [
+      reset && ['the reset', /\b(reset\w*|resum\w*)\b/],
+      emo && ['the EMO', /\b(emo|emergency stop|e stop)\b/],
+      lot.delivered && [`${HOT_LOT} landing on Etch 2`, /\b(4471|lot)\b.*\betch ?(2|two|02)\b|\betch ?(2|two|02)\b.*\b(4471|lot)\b/],
+      pmMove && [`the lot sent to ${PM_TOOL}`, /\betch ?(3|three|03)\b/],
+    ].filter(Boolean);
+    const report = wrap ? words(wrap.text) : '';
+    const left = mistakes.filter(([, re]) => !re.test(report));
+    const owned = wrap && mistakes.length && !left.length ? findSentence([{ text: wrap.text, t: wrap.t }], mistakes[0][1]) : null;
+    c.ownership = rate('both', [
+      said.length ? pt(60, (60 * (said.length - broken.length)) / said.length, `Kept ${said.length - broken.length} of ${said.length} spoken commitments`, null, !broken.length)
+        : pt(60, 0, 'Never said what they would do, so there was nothing to follow through on'),
+      ...broken.slice(0, 3).map((r) => pt(0, 0, `Said but didn’t do: ${(ACTION_LABELS[r.action] || r.action).toLowerCase()}`, r.said.t, false, r.said.quote)),
+      wrap ? pt(15, 15, 'Gave the shift report', wrap.t) : pt(15, 0, 'Gave no shift report'),
+      !wrap ? pt(25, 0, 'No report, so nothing was owned up to')
+        : !mistakes.length ? pt(25, 25, 'No mistakes to own up to')
+        : left.length ? pt(25, 0, `Left ${left.map(([m]) => m).join(' and ')} out of the report`, wrap.t)
+        : pt(25, 25, 'Owned their mistakes in the report', owned ? owned.t : wrap.t, true, owned ? owned.q : null),
+    ], broken.length ? [cap(3, 'Broke a spoken commitment, so this is capped at Proficient')] : []);
+  }
+
+  return Object.fromEntries(COMPETENCIES_ETCH.map((d) => [d.id, c[d.id]]));
+}
+
+// An indicator worth w points, of which `got` were earned. `quote` is the candidate's own words.
+function pt(w, got, text, t = null, ok = got > 0, quote = null) {
+  const e = { ok, text: quote || /[.!?]$/.test(text) ? text : `${text}.`, t: t ?? null };
+  if (quote) e.quote = quote;
+  return { w, got, e };
+}
+const skip = (text) => ({ w: 0, got: 0, skip: true, e: { ok: null, text: `${text}.`, t: null } });
+const cap = (max, text, t = null) => ({ max, e: { ok: false, text: `${text}.`, t: t ?? null } });
+
+function rate(via, parts, caps = []) {
+  const used = parts.filter((p) => !p.skip);
+  const total = used.reduce((s, p) => s + p.w, 0);
+  if (!total) return unrated(via, 'Not enough evidence in this call');
+  const score = Math.round((used.reduce((s, p) => s + p.got, 0) / total) * 100);
+  const level = Math.min(levelOf(score), ...caps.map((x) => x.max));
+  return { level, score, via, evidence: [...caps.map((x) => x.e), ...parts.map((p) => p.e)] };
+}
+
+function unrated(via, why) {
+  return { level: null, score: null, via, evidence: [{ ok: null, text: `${why}.`, t: null }] };
+}
+
+function didText(a) {
+  const tool = a.tool === FOCUS ? 'Etch 2' : a.tool || 'a tool';
+  switch (a.action) {
+    case 'ack_alarm': return `Acknowledged an alarm on ${tool}`;
+    case 'hold_tool': return `Put ${tool} on hold`;
+    case 'call_maintenance': return `Called maintenance for ${tool}`;
+    case 'reset_resume': return `Reset and resumed ${tool}`;
+    case 'emo': return `Pressed the EMO on ${tool}`;
+    case 'reroute': return `Sent ${a.lot || 'a lot'} to ${a.to || 'another tool'}`;
+    case 'notify_supervisor': return 'Messaged the supervisor';
+    default: return ACTION_LABELS[a.action] || String(a.action);
+  }
+}
+
+const sentencesOf = (text) => (String(text || '').match(/[^.!?]+[.!?]*/g) || []).map((s) => s.trim()).filter(Boolean);
+
+// First candidate sentence (in time order) whose words match re.
+function findSentence(lines, re) {
+  for (const l of lines) {
+    for (const s of sentencesOf(l.text)) if (re.test(words(s))) return { q: s, t: l.t ?? null };
+  }
+  return null;
+}
+
 // ---------- timing ----------
 
 function pressureDetail(p1, p2, reset) {
@@ -664,6 +1183,8 @@ function round(v, digits) {
   return Math.round(n * f) / f;
 }
 
+const levelOrNull = (v) => (Number.isInteger(v) && v >= 1 && v <= 5 ? v : null);
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const arr = (v) => (Array.isArray(v) ? v : []);
 const num = (v) => (v === null || v === undefined || v === '' || typeof v === 'boolean' || !Number.isFinite(Number(v)) ? null : Number(v));
 const r1 = (v) => Math.round(v * 10) / 10;
