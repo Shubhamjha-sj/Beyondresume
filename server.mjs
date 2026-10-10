@@ -512,6 +512,8 @@ async function handle(req, res) {
   } catch {
     return sendText(res, 400, 'Bad request');
   }
+  // The product shell is the entry point; standalone FabTwin stays at /index.html.
+  if (url.pathname === '/') return sendText(res, 302, 'Found', { Location: '/prototype/' + url.search });
   const isApi = url.pathname === '/api' || url.pathname.startsWith('/api/');
   if (isApi) res.on('finish', () => console.log(`[api] ${req.method} ${url.pathname} ${res.statusCode} ${Date.now() - started}ms`));
   try {
