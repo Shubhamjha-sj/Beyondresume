@@ -773,7 +773,8 @@ input:disabled,select:disabled,textarea:disabled,.iconbtn:disabled{opacity:.55;c
       </div>
     </div>
     <div class="hero-stage">
-      <div class="hero-video" id="homeArt">
+      <div class="hero-video">
+        <img src="scene_robot.jpg" alt="3D scene of a robot arm inside a fenced cell, generated with World Labs Marble">
         <div class="video-tags">
           <span class="chip"><span class="live-dot"></span>Your site in 3D · World Labs</span>
           <span class="chip">Sample scene</span>
@@ -1069,7 +1070,6 @@ function bayArt(caption){
     (caption ? '<span class="chip art-cap">'+esc(caption)+'</span>' : '');
 }
 $("#briefArt").insertAdjacentHTML("afterbegin", bayArt(""));
-$("#homeArt").insertAdjacentHTML("afterbegin", bayArt(""));
 $("#fabSlot .ph").insertAdjacentHTML("afterbegin", '<div class="slot-art" aria-hidden="true">'+bayArt("")+'</div>');
 
 /* ---------- Navigation ---------- */
