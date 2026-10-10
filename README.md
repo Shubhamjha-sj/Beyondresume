@@ -36,7 +36,7 @@ npm start                  # node server.mjs on http://localhost:5173
 ```
 
 Open http://localhost:5173/ in Chrome, use headphones, and pick **Take it yourself** on the Etch 2 card.
-The call screen embeds FabTwin (`/index.html?embed=1`). Sam is an ElevenLabs agent set up by `npm run agent`.
+The call screen embeds FabTwin (`/index.html?embed=1`). Sam, the AI shift lead, is an ElevenLabs agent (gpt-6-luna, Adam voice) set up by `npm run agent`.
 Results are signed as ECDSA P-256 credentials by the server and can be checked on the Public screen.
 
 `.env.local` (not committed):
