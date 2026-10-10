@@ -13,3 +13,9 @@ Modern Semiconductor Fab Cleanroom.spz
 
 # Downloaded assessment logs
 fabtwin-*.json
+
+# Local secrets (API keys)
+.env*
+
+# Runtime credential store (server.mjs)
+data/

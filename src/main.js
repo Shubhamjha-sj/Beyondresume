@@ -13,6 +13,7 @@ import { scoreSession } from './scoring.js';
 import { Hud } from './hud.js';
 import { ToolPanel, Dashboard } from './panels.js';
 import { showResults } from './results.js';
+import { Bridge, mirrorLog, scenarioSummary, candidateName } from './bridge.js';
 
 const $ = (id) => document.getElementById(id);
 const ui = {
@@ -25,12 +26,18 @@ const ui = {
   setup: $('setup'),
   briefing: $('briefing'),
   candidate: $('candidate'),
+  embedStatus: $('embed-status'),
+  keys: document.querySelector('#overlay .keys'),
   hud: $('hud'),
   labels: $('labels'),
   debug: $('debug'),
   marker: $('minimap-player'),
   results: $('results'),
 };
+
+// Embedded in the call screen (?embed=1): messages to and from the page around us. See src/bridge.js.
+const bridge = CONFIG.embed ? new Bridge() : null;
+if (CONFIG.embed) document.body.classList.add('is-embed');
 
 // ---------- Renderer, scene, camera ----------
 const canvas = $('scene');
@@ -63,6 +70,8 @@ window.fab = { THREE, scene, camera, renderer, spark, CONFIG };
 // ---------- App state ----------
 // mode: loading | ready | walking | panel | relocking | paused | results
 const app = { mode: 'loading', t: 0, started: false, panel: null, target: null, zone: null, candidate: 'Candidate', sampleTimer: 0, panelTimer: 0 };
+// Embed mode only. armed: the call sent 'start'; endReason: 'end' arrived while still loading.
+const embed = { armed: false, endReason: null, clockSent: 0, progress: -1 };
 let player = null;
 let nav = null;
 let minimap = null;
@@ -80,6 +89,11 @@ let def = null;
 function setProgress(fraction, text) {
   ui.barFill.style.width = `${Math.round(fraction * 100)}%`;
   if (text) ui.loadingText.textContent = text;
+  const pct = Math.round(fraction * 100);
+  if (bridge && pct !== embed.progress) {
+    embed.progress = pct;
+    bridge.post('progress', { fraction: pct / 100 });
+  }
 }
 
 function showError(message) {
@@ -144,10 +158,11 @@ async function boot() {
   minimap = map;
   def = scenario;
 
-  audio = new AudioManager(camera);
+  audio = new AudioManager(camera, { speech: !CONFIG.embed, volume: CONFIG.volume });
   tools = new ToolManager(scene, layout, ui.labels);
   oht = new OhtSystem(scene, layout.rails, audio);
   log = new SessionLog();
+  if (bridge) mirrorLog(log, (type, data) => bridge.post(type, data)); // every event/action/zone, once
   runner = new ScenarioRunner(def, { log, onEvent: handleEvent });
   hud = new Hud({ prompt: $('prompt'), clock: $('clock'), badge: $('alarm-badge'), subtitles: $('subtitles'), toast: $('toast') });
   audio.onSubtitle = (speaker, text) => hud.showSubtitle(speaker, text);
@@ -174,15 +189,25 @@ async function boot() {
   document.addEventListener('pointerlockerror', onLockError);
 
   ui.briefing.textContent = def.briefing;
+  Object.assign(window.fab, { world, player, tools, oht, audio, log, runner, def, app, bridge });
+  setProgress(1, 'Ready.');
+  app.mode = 'ready';
+
+  if (CONFIG.embed) {
+    // No name field or Begin button: the call sends 'start', then the candidate clicks in.
+    ui.overlay.addEventListener('click', onEnter);
+    bridge.post('ready', { scenario: scenarioSummary(def) });
+    if (embed.endReason) runner.end(embed.endReason);
+    else if (embed.armed) armEmbed();
+    else setEmbedOverlay('waiting');
+    return;
+  }
+
   ui.enter.addEventListener('click', onEnter);
   ui.candidate.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') onEnter();
   });
-
-  Object.assign(window.fab, { world, player, tools, oht, audio, log, runner, def, app });
-  setProgress(1, 'Ready.');
   ui.enter.disabled = false;
-  app.mode = 'ready';
   ui.candidate.focus();
 }
 
@@ -191,7 +216,7 @@ function onEnter() {
   if (ui.enter.disabled || app.mode === 'results') return;
   if (!app.started) {
     app.started = true;
-    app.candidate = ui.candidate.value.trim() || 'Candidate';
+    if (!CONFIG.embed) app.candidate = ui.candidate.value.trim() || 'Candidate'; // embedded: name came with 'start'
     log.meta = {
       candidate: app.candidate,
       scenario: def.id,
@@ -200,8 +225,10 @@ function onEnter() {
       userAgent: navigator.userAgent,
     };
     ui.setup.classList.add('is-hidden');
-    ui.enter.textContent = 'Resume';
+    ui.enter.textContent = CONFIG.embed ? 'Click to resume' : 'Resume';
     audio.unlock();
+    // The scenario clock starts now (it runs once the pointer is locked); the call aligns its clock here.
+    bridge?.post('started', { t: 0 });
     runner.start();
   } else {
     audio.resume();
@@ -226,7 +253,11 @@ function onUnlock() {
 function onLockError() {
   if (app.mode === 'results') return;
   pause();
-  showError('The browser blocked mouse capture. Click Resume to continue.');
+  showError(
+    CONFIG.embed
+      ? 'The browser blocked mouse capture. Wait a second, then click again.'
+      : 'The browser blocked mouse capture. Click Resume to continue.',
+  );
 }
 
 function pause() {
@@ -234,6 +265,7 @@ function pause() {
   app.mode = 'paused';
   ui.overlay.classList.remove('is-hidden');
   ui.loading.classList.add('is-hidden');
+  if (CONFIG.embed) setEmbedOverlay('paused');
   audio?.suspend();
 }
 
@@ -297,6 +329,17 @@ function finish(reason) {
 
   const score = scoreSession(def, log.entries, log.positions);
   log.meta = { ...log.meta, endedAt: new Date().toISOString(), endReason: reason, durationSec: Math.round(app.t) };
+
+  if (CONFIG.embed) {
+    // The call screen shows the results: hand it everything, go quiet and point back to the call.
+    window.fab.score = score;
+    audio.stopAll();
+    audio.suspend();
+    bridge.post('ended', { reason, score, log: log.toJSON(), def });
+    setEmbedOverlay('done');
+    return;
+  }
+
   const slug = app.candidate.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'candidate';
   showResults(ui.results, {
     score,
@@ -310,11 +353,65 @@ function finish(reason) {
   window.fab.score = score;
 }
 
+// ---------- Embed mode: overlay states and messages from the call ----------
+// Every state shows the overlay. Pointer lock and audio need a click inside this iframe, hence
+// "Click to enter the fab" after the call says 'start'.
+const EMBED_OVERLAY = {
+  loading: { status: '', button: '' },
+  waiting: { status: 'Waiting for the call to start…', button: '' },
+  armed: { status: 'Sam will brief you once you are on the floor.', button: 'Click to enter the fab' },
+  paused: { status: 'Paused. The call is still live.', button: 'Click to resume' },
+  done: { status: 'Exercise complete. Back to the call.', button: '' },
+};
+
+function setEmbedOverlay(state) {
+  const { status, button } = EMBED_OVERLAY[state];
+  ui.overlay.dataset.state = state;
+  ui.overlay.classList.remove('is-hidden');
+  ui.overlay.classList.toggle('is-clickable', !!button);
+  ui.loading.classList.toggle('is-hidden', state !== 'loading');
+  ui.embedStatus.textContent = status;
+  ui.embedStatus.classList.toggle('is-hidden', !status);
+  ui.enter.textContent = button;
+  ui.enter.classList.toggle('is-hidden', !button);
+  ui.enter.disabled = !button;
+  ui.keys?.classList.toggle('is-hidden', state === 'done');
+  if (state === 'done') ui.error.classList.add('is-hidden');
+}
+
+function armEmbed() {
+  setEmbedOverlay('armed');
+  audio.unlock(); // works if the call's click still counts as a gesture here; the click-in unlocks it otherwise
+}
+
+if (CONFIG.embed) setEmbedOverlay('loading');
+
+bridge
+  ?.on('start', (msg) => {
+    if (app.started || app.mode === 'results') return;
+    app.candidate = candidateName(msg.candidate);
+    embed.armed = true;
+    if (app.mode === 'ready') armEmbed(); // otherwise boot() arms it once the world has loaded
+  })
+  .on('end', (msg) => {
+    const reason = msg.reason || 'ended_by_call';
+    if (app.mode === 'loading') embed.endReason = reason; // boot() ends it right after loading
+    else if (runner && !runner.ended) runner.end(reason); // -> scenario_end -> finish() -> 'ended'
+  })
+  .on('subtitle', (msg) => {
+    if (!hud) return;
+    const text = String(msg.text ?? '').trim();
+    if (text) hud.showSubtitleFor(msg.speaker || 'Sam', text);
+    else hud.hideSubtitleSoon(0);
+  });
+
 // ---------- Scenario events -> world ----------
 function handleEvent(evt) {
   switch (evt.type) {
     case 'say':
-      audio.say(evt.text, evt.speaker);
+      // Embedded, the line already went to the call as a 'say' message (mirrorLog): Sam voices the
+      // Supervisor's lines there, and other speakers (Maintenance) only get a subtitle here.
+      if (!CONFIG.embed || (evt.speaker || 'Supervisor') !== 'Supervisor') audio.say(evt.text, evt.speaker);
       break;
     case 'alarm': {
       const tool = tools.setAlarm(evt.tool, evt, app.t);
@@ -501,6 +598,10 @@ renderer.setAnimationLoop(() => {
     app.t += dt;
     log.t = app.t;
     runner.update(app.t);
+    if (bridge && !runner.ended && Math.floor(app.t) > embed.clockSent) {
+      embed.clockSent = Math.floor(app.t);
+      bridge.post('clock', { t: embed.clockSent });
+    }
   }
   const sdt = running ? dt : 0;
 
@@ -543,4 +644,5 @@ boot().catch((err) => {
   console.error(err);
   ui.loadingText.textContent = 'Loading failed.';
   showError(`Couldn't start: ${err?.message || err}`);
+  bridge?.post('error', { message: String(err?.message || err) });
 });

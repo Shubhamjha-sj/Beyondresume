@@ -1,5 +1,23 @@
 # FabTwin – cleanroom readiness assessment
 
+## Live demo (IndustryProof + FabTwin + Sam)
+
+Live: https://industryproof.up.railway.app. Every merge to `main` deploys there. See `CONTRIBUTING.md` for how to work on it.
+
+```bash
+npm start                  # node server.mjs on http://localhost:5173
+```
+
+Open http://localhost:5173/prototype/ in Chrome, use headphones, and pick **Take it yourself** on the Etch 2 card.
+The call screen embeds FabTwin (`/index.html?embed=1`). Sam, the AI shift lead, is an ElevenLabs agent
+(gpt-6-luna, Adam voice) set up by `npm run agent`. Results are signed as ECDSA P-256 credentials by the
+server and can be checked on the Public screen. The contract between the parts is in `docs/INTEGRATION.md`.
+
+`.env.local` (not committed):
+- `ELEVENLABS_AGENT_ID`: the public agent id. Without it the call plays a scripted sample.
+- `ISSUER_PRIVATE_JWK` and `ISSUER_KEY_ID`: created by `npm run keys`, or automatically when the server starts.
+- `ELEVENLABS_API_KEY`: needed only for `npm run agent`.
+
 A walkable digital twin of a semiconductor fab bay (generated with World Labs Marble) where
 candidates handle a live equipment fault. Everything they do is logged and scored.
 
@@ -10,9 +28,9 @@ cd ~/Desktop/Hackathon
 npm start                  # = npx serve -l 5173   (or: python3 -m http.server 5173)
 ```
 
-Open http://localhost:5173 in **Chrome** with sound on. Enter a name and click **Begin shift**.
+Open http://localhost:5173/index.html in **Chrome** with sound on. Enter a name and click **Begin shift**.
 
-For a real candidate, hide the developer tools: http://localhost:5173/?dev=0&debug=0
+For a real candidate, hide the developer tools: http://localhost:5173/index.html?dev=0&debug=0
 
 Run the scenario and scoring tests (no browser needed): `npm test`
 
@@ -90,7 +108,7 @@ tests/scenario.test.mjs    simulated runs that check scoring
   tool as `[x0, x1, z0, z1]` in metres. Press **H** in the app to see every outline, **P** to read
   your position.
 - **Scenarios**: copy `scenarios/etch2-pressure-fault.json`, change it, and open
-  `http://localhost:5173/?scenario=<file-name-without-.json>`. Event types: `say`, `alarm`, `lot`;
+  `http://localhost:5173/index.html?scenario=<file-name-without-.json>`. Event types: `say`, `alarm`, `lot`;
   reactions are keyed by `action:tool` (e.g. `emo:ETCH-02`) or just the action.
 - **New Marble world**: replace `assets/fab.spz`, then
   `pip install numpy pillow && python3 tools/build_navgrid.py assets/fab.spz assets` and check

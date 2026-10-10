@@ -329,3 +329,45 @@ button.emo:hover:not(:disabled) { background: #d32f2f; }
   .results-grid, .dash-body { grid-template-columns: 1fr; }
   #subtitles { max-width: calc(100vw - 32px); bottom: 340px; }
 }
+
+/* ---------- Embedded in the call screen (?embed=1, an iframe of roughly 900 x 500) ---------- */
+/* Overlay: no name field; a status line and one big button (states set by setEmbedOverlay in main.js) */
+.is-embed #setup, .is-embed .fine { display: none; }
+.is-embed #overlay:not([data-state]) #enter { display: none; } /* until main.js has loaded */
+.is-embed #overlay.is-clickable { cursor: pointer; }
+.is-embed .panel { width: min(400px, 100%); padding: 18px 20px; }
+.is-embed .panel h1 { font-size: 20px; }
+.is-embed .panel .sub { margin-bottom: 12px; }
+#embed-status { margin: 0 0 14px; color: #c9d2dc; font-size: 15px; }
+#overlay[data-state="done"] #embed-status { margin: 0; color: var(--text); font-size: 17px; font-weight: 600; }
+.is-embed #enter { padding: 14px 16px; font-size: 16px; }
+.is-embed .keys { margin-top: 14px; gap: 4px; font-size: 12px; }
+.is-embed .keys li > span { min-width: 104px; }
+
+/* HUD: smaller and closer to the edges so the view stays clear */
+.is-embed #clock { top: 8px; font-size: 12px; }
+.is-embed #toast { top: 40px; }
+.is-embed #hint { left: 10px; bottom: 10px; padding: 5px 10px; font-size: 12px; }
+.is-embed #minimap { right: 10px; bottom: 10px; height: min(190px, 36vh); }
+.is-embed #subtitles {
+  bottom: 48px; /* just above the key hint */
+  min-width: min(280px, calc(100vw - 20px)); max-width: calc(100vw - 260px); /* clear of the minimap */
+  padding: 8px 12px; font-size: 14px;
+}
+
+/* Tool screen and terminal: use the whole frame; keep the terminal in two columns when it fits */
+.is-embed .modal { padding: 8px; }
+.is-embed .hmi, .is-embed .dash { max-height: calc(100vh - 16px); }
+.is-embed .hmi { padding: 14px; }
+.is-embed .dash > header, .is-embed .dash > footer { padding: 8px 12px; }
+.is-embed .dash-body { gap: 12px; padding: 10px 12px; }
+.is-embed .dash section { margin-bottom: 12px; }
+.is-embed .dash-map { height: 200px; }
+.is-embed .dash-tools td { padding: 4px 6px; }
+/* Short frame: alarms, then incoming lots, then the tools table, so the lots aren't below the fold */
+.is-embed .dash-col:first-child { display: flex; flex-direction: column; }
+.is-embed .dash-col:first-child > section:has(.dash-alarms) { order: -2; }
+.is-embed .dash-col:first-child > section:has(.dash-lots) { order: -1; }
+@media (min-width: 720px) {
+  .is-embed .dash-body { grid-template-columns: minmax(0, 1fr) 240px; }
+}
