@@ -526,7 +526,7 @@ async function shellHtml({ title, head } = {}) {
 
 // Link-preview tags for the home page, so a shared link to the demo shows a card in Slack, LinkedIn, X and email.
 const SITE_TITLE = 'IndustryProof: Hire talent that handles high-stakes industrial jobs';
-const SITE_DESCRIPTION = 'Candidates face a live crisis on a 3D replica of your site, with an AI shift lead on the call. Every decision becomes a signed, verifiable result.';
+const SITE_DESCRIPTION = 'Candidates face a live crisis on a 3D replica of your site, with an AI shift lead on the call. Every decision is scored with evidence and signed.';
 function siteHead(origin) {
   const meta = (attr, key, value) => `<meta ${attr}="${key}" content="${escHtml(value)}">`;
   const image = `${origin}/prototype/site-og.jpg`;
@@ -540,7 +540,7 @@ function siteHead(origin) {
     meta('property', 'og:image', image),
     meta('property', 'og:image:width', '1200'),
     meta('property', 'og:image:height', '630'),
-    meta('property', 'og:image:alt', 'IndustryProof: a robot cell with a live fault, and the headline Hire talent that handles high-stakes industrial jobs'),
+    meta('property', 'og:image:alt', 'IndustryProof results review: a candidate passes 7 of 8 checks, each with a timestamp and evidence'),
     meta('name', 'twitter:card', 'summary_large_image'),
     meta('name', 'twitter:title', SITE_TITLE),
     meta('name', 'twitter:description', SITE_DESCRIPTION),
