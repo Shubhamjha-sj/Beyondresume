@@ -84,7 +84,7 @@ export function describeSignals(signals, turns) {
   const pressured = ts ? ts.some((t) => t.underPressure) : count > 1;
   const wait = (read) => ({ value: '—', unit: '', read, level: 'none' });
 
-  let tone = wait('Waiting for the first answer');
+  let tone = wait('Waiting for speech');
   if (has && count === 1) tone = { value: '0', unit: '/100', read: 'Baseline set from the first answer', level: 'ok' };
   else if (has) {
     const d = finite(s.toneDrift) ? Math.round(s.toneDrift) : 0;
