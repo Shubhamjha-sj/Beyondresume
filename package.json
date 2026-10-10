@@ -4,6 +4,9 @@
   "version": "0.2.0",
   "description": "Walkable semiconductor-fab digital twin for assessing candidates",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node server.mjs",
     "keys": "node scripts/gen-issuer-key.mjs",
